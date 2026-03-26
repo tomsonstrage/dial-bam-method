@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dial-bam-method.github.io/schema/dial-bam-schema.json",
+  "title": "DIAL-BAM 数据格式规范",
+  "description": "各工具模块输入/输出 JSON 结构，确保跨工具导入导出兼容",
+  "version": "1.0",
+  "$defs": {
+    "insight": {
+      "title": "洞察可视化",
+      "type": "object",
+      "properties": {
+        "p": { "type": "string", "description": "PESTEL 政治" },
+        "e": { "type": "string", "description": "PESTEL 经济" },
+        "s": { "type": "string", "description": "PESTEL 社会" },
+        "t": { "type": "string", "description": "PESTEL 技术" },
+        "env": { "type": "string", "description": "PESTEL 环境" },
+        "l": { "type": "string", "description": "PESTEL 法律" },
+        "c1": { "type": "string", "description": "波特五力 同业竞争" },
+        "c2": { "type": "string", "description": "波特五力 供应商议价" },
+        "c3": { "type": "string", "description": "波特五力 购买者议价" },
+        "c4": { "type": "string", "description": "波特五力 替代品威胁" },
+        "c5": { "type": "string", "description": "波特五力 新进入者威胁" },
+        "sw1": { "type": "string", "description": "SWOT 优势" },
+        "sw2": { "type": "string", "description": "SWOT 劣势" },
+        "sw3": { "type": "string", "description": "SWOT 机会" },
+        "sw4": { "type": "string", "description": "SWOT 威胁" }
+      },
+      "additionalProperties": true
+    },
+    "pain": {
+      "title": "痛点画布",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object" },
+        "pain": { "type": "string", "description": "痛" },
+        "freq": { "type": "string", "description": "频" },
+        "vol": { "type": "string", "description": "量" },
+        "price": { "type": "string", "description": "价" },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "hyp": { "type": "string" },
+              "verify": { "type": "string" },
+              "status": { "type": "string", "enum": ["pending", "done"] }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "bmc": {
+      "title": "商业模式画布",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object" },
+        "partners": { "type": "string", "description": "关键合作" },
+        "activities": { "type": "string", "description": "关键活动" },
+        "resources": { "type": "string", "description": "核心资源" },
+        "value": { "type": "string", "description": "价值主张" },
+        "relationships": { "type": "string", "description": "客户关系" },
+        "channels": { "type": "string", "description": "渠道通路" },
+        "segments": { "type": "string", "description": "客户细分" },
+        "costs": { "type": "string", "description": "成本结构" },
+        "revenue": { "type": "string", "description": "收入来源" }
+      },
+      "additionalProperties": true
+    },
+    "projectBrief": {
+      "title": "Project Brief",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object" },
+        "background": { "type": "string" },
+        "targetMarket": { "type": "string" },
+        "valueProp": { "type": "string" },
+        "assumptions": { "type": "string" },
+        "scope": { "type": "string" },
+        "exclusions": { "type": "string" },
+        "L1": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": {}, "name": {} } }
+        }
+      },
+      "additionalProperties": true
+    },
+    "prd": {
+      "title": "PRD 模板",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object" },
+        "businessBg": { "type": "string" },
+        "targetUser": { "type": "string" },
+        "userJourney": { "type": "string" },
+        "mvpScope": { "type": "string" },
+        "nfr": { "type": "string" },
+        "functions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "desc": { "type": "string" },
+              "mvp": { "type": "string", "enum": ["yes", "no"] }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "matrix": {
+      "title": "BAM 追溯矩阵",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object", "properties": { "name": {}, "version": {}, "updated": {}, "description": {} } },
+        "L1": { "type": "array", "items": { "type": "object", "properties": { "id": {}, "name": {}, "desc": {} } } },
+        "L2": { "type": "array", "items": { "type": "object", "properties": { "id": {}, "name": {}, "route": {}, "L1": {} } } },
+        "L3": { "type": "array", "items": { "type": "object", "properties": { "id": {}, "name": {}, "L2": {}, "L4": {} } } },
+        "requirements": { "type": "array", "items": { "type": "object", "properties": { "id": {}, "name": {}, "priority": {}, "L1": {}, "L2": {}, "epic": {} } } },
+        "epics": { "type": "array", "items": { "type": "object", "properties": { "id": {}, "name": {}, "reqs": {}, "L2": {} } } },
+        "stories": { "type": "array", "items": { "type": "object", "properties": { "id": {}, "epic": {}, "name": {}, "L3": {} } } }
+      },
+      "additionalProperties": true
+    },
+    "planning": {
+      "title": "规划看板",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object" },
+        "epics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "L2": { "type": "array" },
+              "horizon": { "type": "string", "enum": ["short", "medium", "long"] },
+              "status": { "type": "string", "enum": ["todo", "in-progress", "done"] },
+              "stories": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {}, "name": {}, "L3": {},
+                    "horizon": { "type": "string", "enum": ["short", "medium", "long"] },
+                    "status": { "type": "string", "enum": ["todo", "in-progress", "done"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "bml": {
+      "title": "BML 验证看板",
+      "type": "object",
+      "properties": {
+        "meta": { "type": "object" },
+        "iterations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scope": { "type": "string", "description": "关联 Epic/Story" },
+              "build": { "type": "string" },
+              "measure": { "type": "string" },
+              "learn": { "type": "string" },
+              "decision": { "type": "string", "description": "坚持/转向" }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "package": {
+      "title": "交付包",
+      "type": "object",
+      "required": ["meta", "data"],
+      "properties": {
+        "meta": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" },
+            "exportedAt": { "type": "string", "format": "date-time" },
+            "description": { "type": "string" }
+          }
+        },
+        "data": {
+          "type": "object",
+          "propertyNames": {
+            "enum": ["dial-bam-insight", "dial-bam-pain", "dial-bam-projectbrief", "dial-bam-bmc", "dial-bam-prd", "dial-bam-matrix", "dial-bam-planning", "dial-bam-bml"]
+          },
+          "additionalProperties": { "type": "object" }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/insight" },
+    { "$ref": "#/$defs/pain" },
+    { "$ref": "#/$defs/bmc" },
+    { "$ref": "#/$defs/projectBrief" },
+    { "$ref": "#/$defs/prd" },
+    { "$ref": "#/$defs/matrix" },
+    { "$ref": "#/$defs/planning" },
+    { "$ref": "#/$defs/bml" },
+    { "$ref": "#/$defs/package" }
+  ]
+}

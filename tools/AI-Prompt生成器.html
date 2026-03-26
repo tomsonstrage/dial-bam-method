@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Prompt 生成器 - DIAL-BAM Method</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .toolbar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #4c9aed; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .section h3 { font-size: 1rem; margin: 0 0 0.75rem 0; color: var(--accent); }
+    .section label { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer; }
+    .section input[type="checkbox"] { accent-color: var(--accent); }
+    .section textarea {
+      width: 100%;
+      min-height: 120px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.75rem;
+      font-size: 0.85rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .section textarea::placeholder { color: var(--text-muted); }
+    .hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
+    .badge { font-size: 0.7rem; padding: 0.15rem 0.5rem; background: var(--success); color: #fff; border-radius: 4px; }
+    .output-preview {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-top: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 768px) { body { padding: 1rem; } }
+  </style>
+</head>
+<body>
+  <h1>AI Prompt 生成器</h1>
+  <p class="meta">将输入与方法论整理为 Prompt，输入外部 AI 工具（ChatGPT、Claude、通义等）后，可返回 DIAL-BAM 业务分析报告</p>
+
+  <div class="toolbar">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <a href="文档阅读.html?doc=AI-Prompt与输出报告.md" class="btn">Prompt 与报告规范</a>
+    <button class="btn btn-primary" onclick="generateAndCopy()">生成并复制 Prompt</button>
+  </div>
+
+  <div class="section">
+    <h3>选择输入来源</h3>
+    <p class="hint">勾选要纳入 Prompt 的数据，将从各工具 localStorage 读取。若某工具未填写，该部分为空。</p>
+    <label><input type="checkbox" id="chkInsight" checked> 洞察可视化（PESTEL、五力、SWOT）</label>
+    <label><input type="checkbox" id="chkPain" checked> 痛点画布（痛频量价、需求假设）</label>
+    <label><input type="checkbox" id="chkPb"> Project Brief（项目简报）</label>
+    <label><input type="checkbox" id="chkBmc"> 商业模式画布</label>
+    <label><input type="checkbox" id="chkPrd"> PRD 模板</label>
+    <label><input type="checkbox" id="chkBam" checked> BAM 追溯矩阵</label>
+    <label><input type="checkbox" id="chkPlan"> 规划看板</label>
+    <label><input type="checkbox" id="chkBml"> BML 验证看板</label>
+  </div>
+
+  <div class="section">
+    <h3>补充输入（可选）</h3>
+    <textarea id="manualInput" placeholder="可补充：行业、业务方向、当前阶段、待解决问题等。例如：&#10;行业：企业服务 SaaS&#10;业务方向：为中小制造企业提供设备管理数字化&#10;当前阶段：Discovery"></textarea>
+  </div>
+
+  <div class="section">
+    <h3>输出报告要求</h3>
+    <label><input type="checkbox" id="chkFullReport" checked> 完整报告（洞察摘要 + 需求追溯 + 规划 + 风险）</label>
+    <label><input type="checkbox" id="chkIncludeJson"> 要求 AI 输出可导入的 BAM JSON</label>
+  </div>
+
+  <div class="section">
+    <h3>生成的 Prompt 预览</h3>
+    <button class="btn" onclick="preview()">刷新预览</button>
+    <div class="output-preview" id="preview">点击「刷新预览」或「生成并复制」查看</div>
+  </div>
+
+  <div class="section">
+    <h3>粘贴 AI 输出 → 解析并导入</h3>
+    <p class="hint">将外部 AI 返回的报告粘贴到下方，点击「解析 JSON」可提取 BAM 结构并导入到 BAM 追溯矩阵。</p>
+    <textarea id="aiOutput" placeholder="粘贴 ChatGPT、Claude 等返回的完整报告，含 JSON 代码块即可自动解析"></textarea>
+    <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+      <button class="btn" onclick="parseAiOutput()">解析 JSON 并导入 BAM</button>
+      <span id="parseResult" style="font-size:0.85rem;color:var(--text-muted)"></span>
+    </div>
+  </div>
+
+  <script>
+    const CONTEXT = `【角色与上下文】
+你是 DIAL-BAM 业务分析助手。核心理念：战略导向、流程分层、端到端追溯、闭环管理。
+方法论：Discovery（洞察）→ Insight（战略）→ Architecture（业务分解）→ Launch（任务与 BML）。
+分析模型：PESTEL、波特五力、SWOT、痛频量价、BAM 追溯链 REQ↔L1↔L2↔Epic↔Story↔L3↔L4。`;
+
+    const OUTPUT_FULL = `
+【输出要求】
+请按「DIAL-BAM 业务分析报告」格式输出，包含：
+1) 洞察摘要（PESTEL/五力/SWOT 关键发现、战略方向建议）
+2) 需求与追溯（REQ、L1、L2、Epic、Story 映射）
+3) 短中长期规划（短期 1-3 月、中期 3-6 月、长期 6-12 月）
+4) 风险与应对`;
+
+    const OUTPUT_JSON = `
+若可生成 BAM 结构，请在报告末尾附上符合 BAM 导入指南的 JSON（仅输出 JSON 块，可直接导入 BAM 追溯矩阵）。`;
+
+    function getInsightText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-insight') || '{}');
+        const labels = { p:'政治', e:'经济', s:'社会', t:'技术', env:'环境', l:'法律', c1:'同业竞争', c2:'供应商议价', c3:'购买者议价', c4:'替代品威胁', c5:'新进入者威胁', sw1:'优势', sw2:'劣势', sw3:'机会', sw4:'威胁' };
+        let s = '【洞察可视化】\n';
+        Object.entries(d).forEach(([k,v]) => { if (v) s += `- ${labels[k]||k}: ${v}\n`; });
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getPainText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-pain') || '{}');
+        let s = '【痛点画布】\n痛频量价：痛 ' + (d.pain||'') + ' | 频 ' + (d.freq||'') + ' | 量 ' + (d.vol||'') + ' | 价 ' + (d.price||'') + '\n';
+        (d.hypotheses||[]).forEach(h => { s += `- ${h.id||'-'} ${h.hyp||''} | 验证:${h.verify||''} | ${h.status||'待验证'}\n`; });
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getPbText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-projectbrief') || '{}');
+        const f = ['background','targetMarket','valueProp','assumptions','scope','exclusions'];
+        let s = '【Project Brief】\n';
+        f.forEach(k => { if (d[k]) s += `- ${k}: ${d[k]}\n`; });
+        if ((d.L1||[]).length) s += 'L1: ' + (d.L1||[]).map(x=>`${x.id} ${x.name}`).join(', ') + '\n';
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getPrdText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-prd') || '{}');
+        const f = ['businessBg','targetUser','userJourney','mvpScope','nfr'];
+        let s = '【PRD】\n';
+        f.forEach(k => { if (d[k]) s += `- ${k}: ${d[k]}\n`; });
+        if ((d.functions||[]).length) s += '功能: ' + (d.functions||[]).map(x=>`${x.id} ${x.name}`).join('; ') + '\n';
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getBmcText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-bmc') || '{}');
+        const keys = ['cs','vp','ch','cr','rs','kr','ka','kp','cs2'];
+        const labels = { cs:'客户细分', vp:'价值主张', ch:'渠道', cr:'客户关系', rs:'收入来源', kr:'核心资源', ka:'关键活动', kp:'关键合作', cs2:'成本结构' };
+        let s = '【商业模式画布】\n';
+        keys.forEach(k => { if (d[k]) s += `- ${labels[k]||k}: ${d[k]}\n`; });
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getBamText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-matrix') || '{}');
+        if (!d.L1 && !d.requirements) return '';
+        let s = '【BAM 追溯矩阵】\n';
+        if (d.meta?.name) s += '项目: ' + d.meta.name + '\n';
+        if ((d.L1||[]).length) s += 'L1: ' + (d.L1||[]).map(x=>x.name).join(', ') + '\n';
+        if ((d.L2||[]).length) s += 'L2: ' + (d.L2||[]).map(x=>x.name).join(', ') + '\n';
+        if ((d.requirements||[]).length) s += 'REQ: ' + (d.requirements||[]).map(x=>x.id+' '+x.name).join('; ') + '\n';
+        s += '\n完整 JSON 结构（供 AI 理解）：\n' + JSON.stringify({ meta: d.meta, L1: d.L1, L2: d.L2, requirements: d.requirements, epics: d.epics, stories: d.stories, L3: d.L3 }, null, 2);
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getPlanText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-planning') || '{}');
+        if (!(d.epics||[]).length) return '';
+        let s = '【规划看板】\n';
+        (d.epics||[]).forEach(e => {
+          s += `Epic ${e.id} ${e.name} (${e.horizon||'short'})\n`;
+          (e.stories||[]).forEach(st => s += `  - ${st.id} ${st.name}\n`);
+        });
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function getBmlText() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-bml') || '{}');
+        if (!(d.iterations||[]).length) return '';
+        let s = '【BML 验证】\n';
+        (d.iterations||[]).forEach((it,i) => {
+          s += `迭代${i+1}: Build ${it.build||''} | Measure ${it.measure||''} | Learn ${it.learn||''} | 决策: ${it.decision||''}\n`;
+        });
+        return s.trim() || '';
+      } catch { return ''; }
+    }
+
+    function buildUserInput() {
+      const parts = [];
+      if (document.getElementById('chkInsight').checked) { const t = getInsightText(); if (t) parts.push(t); }
+      if (document.getElementById('chkPain').checked) { const t = getPainText(); if (t) parts.push(t); }
+      if (document.getElementById('chkPb').checked) { const t = getPbText(); if (t) parts.push(t); }
+      if (document.getElementById('chkBmc').checked) { const t = getBmcText(); if (t) parts.push(t); }
+      if (document.getElementById('chkPrd').checked) { const t = getPrdText(); if (t) parts.push(t); }
+      if (document.getElementById('chkBam').checked) { const t = getBamText(); if (t) parts.push(t); }
+      if (document.getElementById('chkPlan').checked) { const t = getPlanText(); if (t) parts.push(t); }
+      if (document.getElementById('chkBml').checked) { const t = getBmlText(); if (t) parts.push(t); }
+      const manual = document.getElementById('manualInput').value.trim();
+      if (manual) parts.push('【补充说明】\n' + manual);
+      if (parts.length === 0) return '【用户输入】\n（无结构化数据，请根据你的业务背景直接描述：行业、业务方向、当前阶段、待解决问题）';
+      return '【用户输入】\n\n' + parts.join('\n\n');
+    }
+
+    function buildOutputSpec() {
+      let s = OUTPUT_FULL;
+      if (document.getElementById('chkIncludeJson').checked) s += OUTPUT_JSON;
+      return s;
+    }
+
+    function generatePrompt() {
+      return CONTEXT + '\n\n' + buildUserInput() + '\n\n' + buildOutputSpec();
+    }
+
+    function preview() {
+      document.getElementById('preview').textContent = generatePrompt();
+    }
+
+    function generateAndCopy() {
+      const prompt = generatePrompt();
+      navigator.clipboard.writeText(prompt).then(() => {
+        alert('Prompt 已复制到剪贴板！\n\n请粘贴到 ChatGPT、Claude、通义等外部 AI 工具，即可获取 DIAL-BAM 业务分析报告。');
+        preview();
+      }).catch(() => alert('复制失败，请手动选择并复制下方预览内容'));
+    }
+
+    function parseAiOutput() {
+      const text = document.getElementById('aiOutput').value.trim();
+      const resultEl = document.getElementById('parseResult');
+      if (!text) { resultEl.textContent = '请先粘贴 AI 输出'; return; }
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/\{[\s\S]*"L1"[\s\S]*\}/);
+      let jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]).trim() : text;
+      const fallback = text.match(/\{[\s\S]*\}/);
+      if (!jsonStr && fallback) jsonStr = fallback[0];
+      try {
+        const d = JSON.parse(jsonStr);
+        const hasBam = Array.isArray(d.L1) || Array.isArray(d.requirements) || Array.isArray(d.epics);
+        if (!hasBam) throw new Error('未识别为 BAM 结构（需含 L1、requirements 或 epics）');
+        d.meta = d.meta || {};
+        d.meta.updated = new Date().toISOString().slice(0, 10);
+        localStorage.setItem('dial-bam-matrix', JSON.stringify(d));
+        const cnt = (d.L1?.length || 0) + (d.requirements?.length || 0) + (d.epics?.length || 0);
+        resultEl.innerHTML = '已导入 BAM，共 ' + cnt + ' 条。 <a href="BAM-追溯矩阵.html" style="color:var(--accent)">打开 BAM 追溯矩阵 →</a>';
+      } catch (e) {
+        resultEl.textContent = '解析失败：' + (e.message || '未找到有效 JSON');
+      }
+    }
+
+    preview();
+  </script>
+</body>
+</html>

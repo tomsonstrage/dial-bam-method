@@ -1,0 +1,20 @@
+{
+  "_comment": "PRD 模板 输入/输出模板。填写各字段值后导入。",
+  "meta": {
+    "name": "PRD",
+    "updated": "YYYY-MM-DD"
+  },
+  "businessBg": "",
+  "targetUser": "",
+  "userJourney": "",
+  "mvpScope": "",
+  "nfr": "",
+  "functions": [
+    {
+      "id": "L2-01-01",
+      "name": "",
+      "desc": "",
+      "mvp": "yes"
+    }
+  ]
+}

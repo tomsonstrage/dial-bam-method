@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>规划看板 - DIAL-BAM Method</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .toolbar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .epic-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .epic-card h3 {
+      font-size: 1rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--accent);
+    }
+    .epic-card .meta-row { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .story-item {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .story-item .tag {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+    }
+    .tag-s { background: var(--success); color: #fff; }
+    .tag-m { background: var(--accent); color: #fff; }
+    .tag-l { background: var(--warning); color: #000; }
+    .tag-todo { background: var(--text-muted); color: #fff; }
+    .tag-done { background: var(--success); color: #fff; }
+    .empty { color: var(--text-muted); font-style: italic; font-size: 0.9rem; }
+    .epic-card select, .story-item select {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.4rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      margin-left: 0.25rem;
+    }
+    input[type="file"] { display: none; }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .toolbar .btn, .toolbar a.btn { min-height: 44px; }
+      .board { grid-template-columns: 1fr; }
+      .epic-card { padding: 1rem; }
+      .story-item { padding: 0.6rem 0.75rem; min-height: 44px; }
+    }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.25rem; }
+  }
+  </style>
+</head>
+<body>
+  <h1>规划看板</h1>
+  <p class="meta">Epic / Story 短中长期规划 — 可从 BAM 追溯矩阵导入，或独立填写</p>
+  <div id="practiceHint" style="display:none;padding:0.75rem 1rem;margin-bottom:1rem;background:rgba(63,185,80,0.15);border:1px solid #3fb950;border-radius:6px;font-size:0.9rem"></div>
+
+  <div class="toolbar">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <input type="file" id="fileImport" accept=".json,.xlsx,.xls">
+    <button class="btn" onclick="downloadTemplate()">下载模板</button>
+    <button class="btn" onclick="document.getElementById('fileImport').click()">导入 JSON / Excel</button>
+    <button class="btn primary" onclick="exportJSON()">导出 JSON</button>
+    <a href="BAM-追溯矩阵.html" class="btn">→ BAM 追溯矩阵</a>
+    <a href="DIAL-规划与任务模板.md" class="btn">规划模板</a>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <script>
+    const STORAGE_KEY = 'dial-bam-planning';
+    let data = { epics: [], horizon: {} };
+
+    function loadData(fromFile) {
+      if (fromFile) {
+        data = fromFile;
+      } else {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) data = JSON.parse(stored);
+        } catch (_) {}
+      }
+      data.epics = data.epics || [];
+      data.horizon = data.horizon || {};
+      showPracticeHint();
+      render();
+    }
+    function showPracticeHint() {
+      const el = document.getElementById('practiceHint');
+      if (!el) return;
+      try {
+        const p = JSON.parse(localStorage.getItem('dial-bam-practice-progress') || '{}');
+        const planDone = (p['practice-plan'] || []).length >= 3;
+        const bamDone = (p['practice-bam'] || []).length >= 5;
+        if (planDone) { el.textContent = '✓ 已完成规划看板实训，可继续完善 Epic/Story'; el.style.display = 'block'; }
+        else if (bamDone && (!data.epics || data.epics.length === 0)) { el.innerHTML = '✓ 已完成 BAM 追溯实训，建议 <a href="BAM-追溯矩阵.html" style="color:inherit;text-decoration:underline">从 BAM 导入</a>'; el.style.display = 'block'; }
+        else el.style.display = 'none';
+      } catch (_) { el.style.display = 'none'; }
+    }
+
+    function fromBAM(bam) {
+      const epics = (bam.epics || []).map(e => ({
+        id: e.id,
+        name: e.name,
+        L2: e.L2 || [],
+        horizon: e.horizon || 'short',
+        status: e.status || 'todo',
+        stories: (bam.stories || []).filter(s => s.epic === e.id).map(s => ({
+          id: s.id,
+          name: s.name,
+          L3: s.L3 || [],
+          horizon: s.horizon || 'short',
+          status: s.status || 'todo'
+        }))
+      }));
+      data = { epics, horizon: {} };
+      render();
+    }
+
+    async function downloadTemplate() {
+      try {
+        const r = await fetch('templates/规划看板-模板.json');
+        const t = r.ok ? await r.json() : { meta:{name:'规划看板',updated:''}, epics:[], horizon:{} };
+        delete t._comment;
+        const blob = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '规划看板-模板.json';
+        a.click();
+      } catch (_) {
+        const t = { meta:{name:'规划看板',updated:''}, epics:[], horizon:{} };
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' }));
+        a.download = '规划看板-模板.json';
+        a.click();
+      }
+    }
+
+    function parseExcelToPlanning(workbook) {
+      const sh = workbook.Sheets[workbook.SheetNames[0]];
+      if (!sh) return { epics: [], horizon: {} };
+      const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
+      if (rows.length < 2) return { epics: [], horizon: {} };
+      const h = rows[0].map(c=>String(c||'').trim().toLowerCase());
+      const idx = (k) => h.findIndex(x=>x.includes(k));
+      const col = (key, alt) => { const i = idx(key); return i>=0 ? i : (typeof alt==='number'?alt:h.findIndex(x=>x.includes(alt))); };
+      const ei = col('epic_id','epic');
+      const en = col('epic_name','epic');
+      const eh = col('epic_horizon','horizon');
+      const es = col('epic_status','status');
+      const si = col('story_id','story');
+      const sn = col('story_name','story');
+      const sh2 = col('story_horizon');
+      const ss = col('story_status');
+      const epicMap = {};
+      rows.slice(1).filter(r=>r.some(c=>c)).forEach(r=>{
+        const eid = String(r[ei]??r[0]??'').trim();
+        if (!eid) return;
+        if (!epicMap[eid]) epicMap[eid] = { id: eid, name: String(r[en]??r[1]??'').trim(), L2: [], horizon: 'short', status: 'todo', stories: [] };
+        const ehVal = String(r[eh]??'').trim().toLowerCase();
+        if (ehVal && ['short','medium','long'].includes(ehVal)) epicMap[eid].horizon = ehVal;
+        const esVal = String(r[es]??'').trim().toLowerCase();
+        if (esVal && ['todo','in-progress','done'].includes(esVal)) epicMap[eid].status = esVal;
+        const sid = String(r[si]??r[4]??'').trim();
+        const sname = String(r[sn]??r[5]??'').trim();
+        if (sid || sname) epicMap[eid].stories.push({ id: sid||('S-'+eid+'-'+(epicMap[eid].stories.length+1)), name: sname, L3: [], horizon: ['short','medium','long'].includes(String(r[sh2]??'').trim().toLowerCase()) ? String(r[sh2]).trim().toLowerCase() : 'short', status: ['todo','in-progress','done'].includes(String(r[ss]??'').trim().toLowerCase()) ? String(r[ss]).trim().toLowerCase() : 'todo' });
+      });
+      return { epics: Object.values(epicMap), horizon: {} };
+    }
+
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const isExcel = /\.(xlsx|xls)$/i.test(f.name);
+      if (isExcel) {
+        const r = new FileReader();
+        r.onload = () => {
+          try {
+            const wb = XLSX.read(r.result, { type: 'array' });
+            const d = typeof XLSX !== 'undefined' ? parseExcelToPlanning(wb) : null;
+            if (!d) { alert('Excel 解析需要 SheetJS'); e.target.value = ''; return; }
+            loadData(d);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            alert('Excel 导入成功，共 ' + (d.epics?.length||0) + ' 个 Epic');
+          } catch (err) { alert('Excel 解析失败'); }
+          e.target.value = '';
+        };
+        r.readAsArrayBuffer(f);
+      } else {
+        const r = new FileReader();
+        r.onload = () => {
+          try {
+            const d = JSON.parse(r.result);
+            if (d.L1 || d.requirements || (d.epics && d.stories)) {
+              fromBAM(d);
+            } else {
+              loadData(d);
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            alert('导入成功');
+          } catch (err) {
+            alert('JSON 解析失败');
+          }
+          e.target.value = '';
+        };
+        r.readAsText(f, 'UTF-8');
+      }
+    });
+
+    function render() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      if (!data.epics || data.epics.length === 0) {
+        board.innerHTML = '<p class="empty">暂无数据。请从 BAM 追溯矩阵导入 JSON，或使用 BAM 追溯矩阵编辑后导出再导入。</p>';
+        return;
+      }
+      data.epics.forEach((epic, ei) => {
+        const card = document.createElement('div');
+        card.className = 'epic-card';
+        const hTag = (epic.horizon || 'short') === 'short' ? 'tag-s' : (epic.horizon === 'medium' ? 'tag-m' : 'tag-l');
+        const hLabel = { short: '短期', medium: '中期', long: '长期' }[epic.horizon || 'short'];
+        const statusLabel = { todo: '待办', 'in-progress': '进行中', done: '完成' }[epic.status || 'todo'];
+        const storiesHtml = (epic.stories || []).map((s, si) => {
+          const sTag = (s.horizon || 'short') === 'short' ? 'tag-s' : (s.horizon === 'medium' ? 'tag-m' : 'tag-l');
+          const sLabel = { short: '短期', medium: '中期', long: '长期' }[s.horizon || 'short'];
+          const sStatus = { todo: '待办', 'in-progress': '进行中', done: '完成' }[s.status || 'todo'];
+          return `<div class="story-item">
+            ${s.id} ${s.name}
+            <select onchange="updateStory(${ei},${si},'horizon',this.value)"><option value="short" ${(s.horizon||'short')==='short'?'selected':''}>短期</option><option value="medium" ${(s.horizon||'')==='medium'?'selected':''}>中期</option><option value="long" ${(s.horizon||'')==='long'?'selected':''}>长期</option></select>
+            <select onchange="updateStory(${ei},${si},'status',this.value)"><option value="todo" ${(s.status||'todo')==='todo'?'selected':''}>待办</option><option value="in-progress" ${(s.status||'')==='in-progress'?'selected':''}>进行中</option><option value="done" ${(s.status||'')==='done'?'selected':''}>完成</option></select>
+          </div>`;
+        }).join('');
+        card.innerHTML = `
+          <h3>${epic.id} ${epic.name}
+            <select onchange="updateEpic(${ei},'horizon',this.value)"><option value="short" ${(epic.horizon||'short')==='short'?'selected':''}>短期</option><option value="medium" ${(epic.horizon||'')==='medium'?'selected':''}>中期</option><option value="long" ${(epic.horizon||'')==='long'?'selected':''}>长期</option></select>
+            <select onchange="updateEpic(${ei},'status',this.value)"><option value="todo" ${(epic.status||'todo')==='todo'?'selected':''}>待办</option><option value="in-progress" ${(epic.status||'')==='in-progress'?'selected':''}>进行中</option><option value="done" ${(epic.status||'')==='done'?'selected':''}>完成</option></select>
+          </h3>
+          <div class="meta-row">L2: ${(epic.L2 || []).join(', ') || '-'}</div>
+          <div>${storiesHtml || '<span class="empty">无 Story</span>'}</div>
+        `;
+        board.appendChild(card);
+      });
+    }
+
+    function updateEpic(ei, key, val) {
+      data.epics[ei] = data.epics[ei] || {};
+      data.epics[ei][key] = val;
+      save();
+    }
+    function updateStory(ei, si, key, val) {
+      data.epics[ei].stories = data.epics[ei].stories || [];
+      data.epics[ei].stories[si] = data.epics[ei].stories[si] || {};
+      data.epics[ei].stories[si][key] = val;
+      save();
+    }
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '规划看板-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

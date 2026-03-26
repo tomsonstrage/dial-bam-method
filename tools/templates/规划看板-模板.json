@@ -1,0 +1,26 @@
+{
+  "_comment": "规划看板 输入/输出模板。填写各字段值后导入。",
+  "meta": {
+    "name": "规划看板",
+    "updated": "YYYY-MM-DD"
+  },
+  "epics": [
+    {
+      "id": "EPIC-1",
+      "name": "",
+      "L2": [],
+      "horizon": "short",
+      "status": "todo",
+      "stories": [
+        {
+          "id": "S1.1",
+          "name": "",
+          "L3": [],
+          "horizon": "short",
+          "status": "todo"
+        }
+      ]
+    }
+  ],
+  "horizon": {}
+}

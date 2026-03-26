@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "name": "BAM 追溯矩阵 - 【项目名称】",
+    "version": "1.0",
+    "updated": "YYYY-MM-DD",
+    "description": "REQ ↔ L1 ↔ L2 ↔ Epic ↔ Story ↔ L3 ↔ L4 全链路映射"
+  },
+  "L1": [
+    { "id": "L1-01", "name": "【一级业务域名称】", "desc": "【描述】" }
+  ],
+  "L2": [
+    { "id": "L2-01", "name": "【二级模块名称】", "route": "/path", "L1": "L1-01" }
+  ],
+  "requirements": [
+    { "id": "REQ-001", "name": "【需求名称】", "priority": "P1", "L1": ["L1-01"], "L2": ["L2-01"], "epic": "EPIC-1" }
+  ],
+  "epics": [
+    { "id": "EPIC-1", "name": "【Epic 名称】", "reqs": ["REQ-001"], "L2": ["L2-01"] }
+  ],
+  "stories": [
+    { "id": "S1.1", "epic": "EPIC-1", "name": "【用户故事简述】", "L3": ["L3-01-01"] }
+  ],
+  "L3": [
+    { "id": "L3-01-01", "name": "【三级业务动作】", "L2": "L2-01", "L4": ["【四级步骤1】", "【四级步骤2】"] }
+  ]
+}

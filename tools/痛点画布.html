@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>痛点画布 - DIAL-BAM Method</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .tpfv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      max-width: 900px;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 600px) { .tpfv-grid { grid-template-columns: 1fr; } }
+    .tpfv-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .tpfv-cell h3 {
+      font-size: 1rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--accent);
+    }
+    .tpfv-cell .hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .tpfv-cell textarea {
+      width: 100%;
+      min-height: 80px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+    .tpfv-cell.pain { border-left: 4px solid var(--danger); }
+    .tpfv-cell.freq { border-left: 4px solid var(--warning); }
+    .tpfv-cell.vol { border-left: 4px solid var(--accent); }
+    .tpfv-cell.price { border-left: 4px solid var(--success); }
+    .hypotheses {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .hypotheses h3 { font-size: 1rem; margin: 0 0 0.75rem 0; color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--surface2); color: var(--text-muted); font-weight: 500; }
+    input, select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.5rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+    }
+    .badge { font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px; }
+    .badge-pending { background: var(--warning); color: #000; }
+    .badge-done { background: var(--success); color: #fff; }
+    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .workflow-bar a { color: var(--text-muted); text-decoration: none; }
+    .workflow-bar a:hover { color: var(--accent); }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .hypotheses table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <h1>痛点画布</h1>
+  <p class="meta">痛频量价 — 验证需求强度、频率、规模、付费意愿；需求假设清单（Discovery 阶段）</p>
+  <nav class="workflow-bar" style="display:flex;flex-wrap:wrap;gap:0.25rem;font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">
+    <a href="index.html">工具中心</a><span style="color:var(--border)">→</span>
+    <a href="洞察可视化.html">洞察</a><span style="color:var(--border)">→</span>
+    <span style="color:var(--accent)">痛点</span><span style="color:var(--border)">→</span>
+    <a href="BAM-追溯矩阵.html">BAM</a><span style="color:var(--border)">→</span>
+    <a href="交付包导出.html">交付包</a>
+  </nav>
+
+  <div class="tpfv-grid">
+    <div class="tpfv-cell pain">
+      <h3>痛 — 需求强度</h3>
+      <textarea id="pain" placeholder="用户访谈结论、痛点排序、是否真痛？"></textarea>
+      <div class="hint">用户访谈 5–10 人，痛点排序，确认「是否真痛」</div>
+    </div>
+    <div class="tpfv-cell freq">
+      <h3>频 — 发生频率</h3>
+      <textarea id="freq" placeholder="日/周/月使用频率？行为数据或问卷结论"></textarea>
+      <div class="hint">行为数据或问卷，确认使用频率</div>
+    </div>
+    <div class="tpfv-cell vol">
+      <h3>量 — 用户规模</h3>
+      <textarea id="vol" placeholder="TAM/SAM/SOM 市场估算"></textarea>
+      <div class="hint">TAM（总市场）→ SAM（可服务）→ SOM（可获取）</div>
+    </div>
+    <div class="tpfv-cell price">
+      <h3>价 — 付费意愿</h3>
+      <textarea id="price" placeholder="预付费测试、定价实验、付费意愿结论"></textarea>
+      <div class="hint">预付费/众筹测试，或定价实验</div>
+    </div>
+  </div>
+
+  <div class="hypotheses">
+    <h3>需求假设清单</h3>
+    <table>
+      <thead><tr><th>ID</th><th>假设</th><th>验证方式</th><th>状态</th><th></th></tr></thead>
+      <tbody id="hypBody"></tbody>
+    </table>
+    <button class="btn btn-sm" onclick="addHypothesis()">+ 新增假设</button>
+  </div>
+
+  <div class="actions">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <input type="file" id="fileImport" accept=".json" style="display:none">
+    <button class="btn" onclick="downloadTemplate()">下载模板</button>
+    <button class="btn" onclick="document.getElementById('fileImport').click()">导入 JSON</button>
+    <button class="btn" onclick="importFromInsight()">从洞察导入</button>
+    <button class="btn" onclick="exportJSON()">导出 JSON</button>
+    <button class="btn" onclick="exportText()">导出文本</button>
+    <button class="btn primary" onclick="copyForAI()">复制为 AI 提示词</button>
+    <button class="btn primary" onclick="copyForBAM()">生成 BAM 初稿</button>
+    <button class="btn primary" onclick="goToBAM()">前往 BAM 导入 →</button>
+    <a href="洞察可视化.html" class="btn">← 洞察可视化</a>
+    <a href="BAM-追溯矩阵.html" class="btn">→ BAM 追溯矩阵</a>
+    <button class="btn" onclick="clearAll()">清空</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'dial-bam-pain';
+    const KEYS = ['pain','freq','vol','price'];
+
+    function load() {
+      try {
+        const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        KEYS.forEach(k => { const el = document.getElementById(k); if (el && d[k]) el.value = d[k]; });
+        if (d.hypotheses) data.hypotheses = d.hypotheses;
+      } catch (_) {}
+    }
+    function save() {
+      const d = {};
+      KEYS.forEach(k => { const el = document.getElementById(k); if (el) d[k] = el.value; });
+      d.hypotheses = data.hypotheses;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    }
+    document.querySelectorAll('.tpfv-cell textarea').forEach(el => el.addEventListener('input', save));
+
+    let data = { hypotheses: [] };
+
+    function renderHypotheses() {
+      const tbody = document.getElementById('hypBody');
+      tbody.innerHTML = '';
+      (data.hypotheses || []).forEach((h, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${escapeHtml(h.id||'')}" onchange="updateHyp(${i},'id',this.value)"></td>
+          <td><input type="text" value="${escapeHtml(h.hyp||'')}" onchange="updateHyp(${i},'hyp',this.value)"></td>
+          <td><input type="text" value="${escapeHtml(h.verify||'')}" onchange="updateHyp(${i},'verify',this.value)"></td>
+          <td><select onchange="updateHyp(${i},'status',this.value)">
+            <option value="pending" ${h.status==='done'?'':'selected'}>待验证</option>
+            <option value="done" ${h.status==='done'?'selected':''}>已验证</option>
+          </select></td>
+          <td><button class="btn btn-sm" onclick="delHyp(${i})">删除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    function escapeHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+    function updateHyp(i, k, v) { data.hypotheses[i] = data.hypotheses[i] || {}; data.hypotheses[i][k] = v; save(); }
+    function addHypothesis() {
+      data.hypotheses = data.hypotheses || [];
+      data.hypotheses.push({ id: 'H' + (data.hypotheses.length + 1), hyp: '', verify: '', status: 'pending' });
+      save();
+      renderHypotheses();
+    }
+    function delHyp(i) {
+      data.hypotheses.splice(i, 1);
+      save();
+      renderHypotheses();
+    }
+
+    async function downloadTemplate() {
+      try {
+        const r = await fetch('templates/痛点画布-模板.json');
+        const t = r.ok ? await r.json() : { meta:{name:'痛点画布',updated:''}, pain:'',freq:'',vol:'',price:'',hypotheses:[] };
+        delete t._comment;
+        const blob = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '痛点画布-模板.json';
+        a.click();
+      } catch (_) {
+        const t = { meta:{name:'痛点画布',updated:''}, pain:'',freq:'',vol:'',price:'',hypotheses:[] };
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' }));
+        a.download = '痛点画布-模板.json';
+        a.click();
+      }
+    }
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const d = JSON.parse(r.result);
+          KEYS.forEach(k => { const el = document.getElementById(k); if (el && d[k] !== undefined) el.value = d[k]; });
+          if (Array.isArray(d.hypotheses)) data.hypotheses = d.hypotheses;
+          save();
+          renderHypotheses();
+          alert('导入成功');
+        } catch (err) { alert('导入失败：' + (err.message || '无效 JSON')); }
+        e.target.value = '';
+      };
+      r.readAsText(f, 'UTF-8');
+    });
+
+    function exportJSON() {
+      const d = { meta: { name: '痛点画布', updated: new Date().toISOString().slice(0,10) } };
+      KEYS.forEach(k => { const el = document.getElementById(k); if (el) d[k] = el.value; });
+      d.hypotheses = data.hypotheses;
+      const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '痛点画布-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+    }
+    function exportText() {
+      const labels = { pain:'痛', freq:'频', vol:'量', price:'价' };
+      let text = '痛点画布（痛频量价）\n' + '='.repeat(20) + '\n\n';
+      KEYS.forEach(k => {
+        const el = document.getElementById(k);
+        text += labels[k] + '：\n' + (el ? el.value : '') + '\n\n';
+      });
+      text += '需求假设清单\n' + '-'.repeat(15) + '\n';
+      (data.hypotheses || []).forEach(h => {
+        text += `${h.id || '-'}\t${h.hyp || '-'}\t${h.verify || '-'}\t${h.status || '待验证'}\n`;
+      });
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '痛点画布-' + new Date().toISOString().slice(0,10) + '.txt';
+      a.click();
+    }
+    function goToBAM() {
+      save();
+      window.location.href = 'BAM-追溯矩阵.html?from=pain';
+    }
+
+    function copyForBAM() {
+      const labels = { pain:'痛', freq:'频', vol:'量', price:'价' };
+      let s = '请基于以下痛频量价与需求假设，生成 BAM 追溯矩阵的 JSON 初稿。输出格式必须为纯 JSON。\n\n【痛频量价】\n';
+      KEYS.forEach(k => {
+        const el = document.getElementById(k);
+        s += labels[k] + '：' + (el ? el.value || '（待填写）' : '') + '\n';
+      });
+      s += '\n【需求假设】\n';
+      (data.hypotheses || []).forEach(h => {
+        s += `${h.id||'-'} ${h.hyp||''} | 验证:${h.verify||''} | ${h.status||'待验证'}\n`;
+      });
+      s += '\n请输出符合 BAM 结构的 JSON（仅输出 JSON）：含 meta、L1、L2、L3、requirements、epics、stories。';
+      navigator.clipboard.writeText(s).then(() => alert('已复制 BAM 生成提示词。粘贴到 AI 获取 JSON 后，在 BAM 追溯矩阵中点击「导入 JSON」即可。'));
+    }
+    function copyForAI() {
+      const labels = { pain:'痛', freq:'频', vol:'量', price:'价' };
+      let s = '请基于以下痛频量价分析，输出：1) 需求优先级排序；2) 建议的验证方式；3) 与 BAM 需求（REQ）的映射建议。\n\n【痛频量价】\n';
+      KEYS.forEach(k => {
+        const el = document.getElementById(k);
+        s += labels[k] + '：' + (el ? el.value || '（待填写）' : '') + '\n';
+      });
+      s += '\n【需求假设】\n';
+      (data.hypotheses || []).forEach(h => {
+        s += `${h.id || '-'} ${h.hyp || '-'} | 验证：${h.verify || '-'} | ${h.status || '待验证'}\n`;
+      });
+      navigator.clipboard.writeText(s).then(() => alert('已复制到剪贴板'));
+    }
+    function clearAll() {
+      if (confirm('确定清空？')) {
+        KEYS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
+        data.hypotheses = [];
+        localStorage.removeItem(STORAGE_KEY);
+        renderHypotheses();
+      }
+    }
+
+    function importFromInsight() {
+      try {
+        const raw = localStorage.getItem('dial-bam-insight-for-pain');
+        if (!raw) { alert('暂无洞察数据。请先在洞察可视化中填写并点击「推送到痛点画布」'); return; }
+        const d = JSON.parse(raw);
+        const summary = d.summary || '';
+        const painEl = document.getElementById('pain');
+        if (painEl) {
+          painEl.value = painEl.value ? painEl.value + '\n\n' + summary : summary;
+          save();
+          alert('已导入洞察结论到「痛」字段');
+        }
+      } catch (e) {
+        alert('导入失败：' + (e.message || '无效数据'));
+      }
+    }
+
+    load();
+    renderHypotheses();
+    // 若从洞察跳转而来，自动提示导入
+    (function() {
+      const params = new URLSearchParams(location.search);
+      if (params.get('from') === 'insight') {
+        const raw = localStorage.getItem('dial-bam-insight-for-pain');
+        if (raw && confirm('检测到洞察数据，是否导入到「痛」字段？')) importFromInsight();
+      }
+    })();
+  </script>
+</body>
+</html>

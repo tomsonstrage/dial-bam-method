@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文档阅读 - DIAL-BAM Method</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.6;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .header select {
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9rem;
+      min-width: 200px;
+    }
+    .header a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .header a:hover { text-decoration: underline; }
+    .doc-body {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      max-width: 900px;
+    }
+    .doc-body h1 { font-size: 1.5rem; margin: 0 0 1rem 0; }
+    .doc-body h2 { font-size: 1.2rem; margin: 1.5rem 0 0.75rem 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .doc-body h3 { font-size: 1.05rem; margin: 1rem 0 0.5rem 0; }
+    .doc-body p { margin: 0.5rem 0; }
+    .doc-body ul, .doc-body ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+    .doc-body table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+    .doc-body th, .doc-body td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
+    .doc-body th { background: rgba(88,166,255,0.1); }
+    .doc-body code { background: rgba(0,0,0,0.3); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .doc-body pre { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 6px; overflow-x: auto; }
+    .doc-body pre code { background: none; padding: 0; }
+    .doc-body a { color: var(--accent); }
+    .doc-body blockquote { border-left: 4px solid var(--accent); margin: 1rem 0; padding-left: 1rem; color: var(--text-muted); }
+    .empty { color: var(--text-muted); font-style: italic; }
+    select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn-print {
+      padding: 0.4rem 0.8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-print:hover { border-color: var(--accent); }
+    .doc-search-hit { background: rgba(210, 153, 34, 0.4); border-radius: 2px; }
+    @media print {
+      .header, #backTop, .btn-print, #navBtns { display: none !important; }
+      body { background: #fff; color: #000; }
+      .doc-body { background: #fff; border: none; }
+    }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .doc-body { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <input type="text" id="docSearch" placeholder="搜索文档（标题/文件名）" style="padding:0.5rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.9rem;min-width:180px" title="输入关键词筛选文档列表">
+    <select id="docSelect" onchange="loadDoc(this.value)">
+      <option value="">选择文档</option>
+      <optgroup label="快速开始">
+        <option value="快速开始.md">快速开始</option>
+        <option value="交付件清单.md">交付件清单</option>
+      </optgroup>
+      <optgroup label="核心理念与方法论">
+        <option value="00-核心理念.md">00 核心理念</option>
+        <option value="01-方法论.md">01 方法论</option>
+      </optgroup>
+      <optgroup label="DIAL 阶段">
+        <option value="02-Discovery.md">02 Discovery</option>
+        <option value="03-Insight.md">03 Insight</option>
+        <option value="04-Architecture.md">04 Architecture</option>
+        <option value="05-Launch.md">05 Launch</option>
+        <option value="06-AI增强与裁剪.md">06 AI 增强与裁剪</option>
+      </optgroup>
+      <optgroup label="DIAL 与 BAM 详解">
+        <option value="DIAL.md">DIAL 详解</option>
+        <option value="BAM.md">BAM 详解</option>
+      </optgroup>
+      <optgroup label="学习与培训">
+        <option value="学习培训体系.md">学习培训体系</option>
+      </optgroup>
+      <optgroup label="参考与延伸">
+        <option value="AI-Prompt与输出报告.md">AI Prompt 与输出报告</option>
+        <option value="平台输入与数据入口.md">平台输入与数据入口</option>
+        <option value="工具应用.md">工具应用</option>
+        <option value="业务流与优化指南.md">业务流与优化指南</option>
+        <option value="参考框架索引.md">参考框架索引</option>
+        <option value="参考框架与AI时代.md">参考框架与 AI 时代</option>
+        <option value="与BMAD的关系.md">与 BMAD 的关系</option>
+        <option value="内核与延伸.md">内核与延伸</option>
+        <option value="指导文档/README.md">指导文档</option>
+      </optgroup>
+      <optgroup label="集成与案例">
+        <option value="平台集成指南.md">平台集成指南</option>
+        <option value="企业案例-销售线索管理数字化.md">企业案例：销售线索管理数字化</option>
+        <option value="BAM-导入指南.md">BAM 导入指南</option>
+        <option value="DIAL-规划与任务模板.md">DIAL 规划与任务模板</option>
+      </optgroup>
+      <optgroup label="帮助">
+        <option value="术语表.md">术语表</option>
+        <option value="常见问题.md">常见问题 FAQ</option>
+        <option value="反馈与社区.md">反馈与社区</option>
+      </optgroup>
+      <optgroup label="开发">
+        <option value="开发计划-需求分析与路线图.md">开发计划与路线图</option>
+      </optgroup>
+    </select>
+    <a href="index.html">← 工具中心</a>
+    <span id="navBtns" style="display:none;align-items:center;gap:0.5rem">
+      <button class="btn-print" onclick="navDoc(-1)" title="上一文档">← 上一文档</button>
+      <button class="btn-print" onclick="navDoc(1)" title="下一文档">下一文档 →</button>
+    </span>
+    <button class="btn-print" onclick="copyDocLink()" title="复制当前文档链接">复制链接</button>
+    <button class="btn-print" onclick="window.print()" title="打印或另存为 PDF">打印</button>
+    <span style="font-size:0.75rem;color:var(--text-muted)" title="← → 切换文档">⌨</span>
+    <span id="inDocSearchWrap" style="display:none;align-items:center;gap:0.5rem">
+      <input type="text" id="inDocSearch" placeholder="在当前文档内搜索" style="padding:0.35rem 0.75rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.85rem;width:140px">
+      <button class="btn-print" onclick="highlightInDoc()" title="高亮匹配">高亮</button>
+      <button class="btn-print" onclick="clearHighlight()" title="清除高亮">清除</button>
+    </span>
+  </div>
+  <div class="doc-body" id="content">
+    <p class="empty">请从上方选择文档</p>
+  </div>
+  <div id="backTop" style="display:none;position:fixed;bottom:2rem;right:2rem;padding:0.5rem 1rem;background:var(--accent);color:#fff;border-radius:6px;cursor:pointer;font-size:0.9rem">返回顶部</div>
+
+  <script>
+    const base = '../docs/';
+    const docList = ['快速开始.md','交付件清单.md','企业案例-销售线索管理数字化.md','平台集成指南.md','反馈与社区.md','00-核心理念.md','01-方法论.md','02-Discovery.md','03-Insight.md','04-Architecture.md','05-Launch.md','06-AI增强与裁剪.md','DIAL.md','BAM.md','学习培训体系.md','AI-Prompt与输出报告.md','平台输入与数据入口.md','工具应用.md','业务流与优化指南.md','参考框架索引.md','参考框架与AI时代.md','与BMAD的关系.md','内核与延伸.md','指导文档/README.md','术语表.md','常见问题.md','开发计划-需求分析与路线图.md','DIAL-BAM方法论演进分析与规划.md','BAM-导入指南.md','DIAL-规划与任务模板.md'];
+    const urlParams = new URLSearchParams(location.search);
+    const initialDoc = urlParams.get('doc');
+
+    marked.setOptions({ gfm: true, breaks: true });
+
+    function navDoc(delta) {
+      const idx = docList.indexOf(document.getElementById('docSelect').value);
+      if (idx < 0) return;
+      const next = idx + delta;
+      if (next >= 0 && next < docList.length) loadDoc(docList[next]);
+    }
+    function copyDocLink() {
+      const doc = document.getElementById('docSelect').value;
+      if (!doc) { alert('请先选择文档'); return; }
+      const url = location.origin + location.pathname + '?doc=' + encodeURIComponent(doc);
+      navigator.clipboard.writeText(url).then(() => alert('链接已复制'));
+    }
+
+    async function loadDoc(file) {
+      if (!file) {
+        document.getElementById('content').innerHTML = '<p class="empty">请从上方选择文档</p>';
+        showInDocSearch(false);
+        return;
+      }
+      const content = document.getElementById('content');
+      content.innerHTML = '<p class="empty">加载中...</p>';
+      try {
+        let res = await fetch(base + file);
+        if (!res.ok && !file.startsWith('../')) res = await fetch(file);
+        if (!res.ok) throw new Error(res.status);
+        const md = await res.text();
+        content.innerHTML = marked.parse(md);
+        document.getElementById('docSelect').value = file;
+        document.getElementById('navBtns').style.display = docList.includes(file) ? 'inline-flex' : 'none';
+        showInDocSearch(true);
+        clearHighlight();
+        fixLinks(content, file);
+        localStorage.setItem('dial-bam-lastDoc', file);
+        history.replaceState({}, '', '?doc=' + encodeURIComponent(file));
+      } catch (e) {
+        content.innerHTML = '<p class="empty">无法加载文档：' + file + '</p>';
+      }
+    }
+
+    function fixLinks(container, currentFile) {
+      const baseDir = currentFile.includes('/') ? currentFile.split('/').slice(0,-1).join('/') + '/' : '';
+      container.querySelectorAll('a[href$=".md"]').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href.startsWith('http') || href.startsWith('#')) return;
+        const full = href.startsWith('/') ? href.slice(1) : (baseDir + href).replace(/\/\//g, '/');
+        a.href = 'javascript:void(0)';
+        a.onclick = () => loadDoc(full);
+      });
+    }
+
+    const backTop = document.getElementById('backTop');
+    backTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.addEventListener('scroll', () => {
+      backTop.style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+      if (e.key === 'ArrowLeft') { navDoc(-1); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { navDoc(1); e.preventDefault(); }
+    });
+
+    // 文档列表关键词检索
+    const docSearchEl = document.getElementById('docSearch');
+    docSearchEl.addEventListener('input', () => {
+      const kw = docSearchEl.value.trim().toLowerCase();
+      document.querySelectorAll('#docSelect optgroup').forEach(grp => {
+        let visible = 0;
+        grp.querySelectorAll('option').forEach(opt => {
+          const match = !kw || opt.textContent.toLowerCase().includes(kw) || opt.value.toLowerCase().includes(kw);
+          opt.style.display = match ? '' : 'none';
+          if (match) visible++;
+        });
+        grp.style.display = visible ? '' : 'none';
+      });
+    });
+    docSearchEl.addEventListener('focus', () => docSearchEl.select());
+
+    // 在当前文档内搜索与高亮
+    function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function clearHighlight() {
+      const content = document.getElementById('content');
+      content.querySelectorAll('mark.doc-search-hit').forEach(m => {
+        const p = m.parentNode;
+        p.replaceChild(document.createTextNode(m.textContent), m);
+        p.normalize();
+      });
+      document.getElementById('inDocSearch').value = '';
+    }
+    function highlightInDoc() {
+      clearHighlight();
+      const term = document.getElementById('inDocSearch').value.trim();
+      if (!term) return;
+      const content = document.getElementById('content');
+      if (!content || content.querySelector('.empty')) return;
+      const html = content.innerHTML;
+      const re = new RegExp('(' + escapeRe(term) + ')', 'gi');
+      content.innerHTML = html.replace(/<[^>]*>|([^<]+)/g, (m, text) => {
+        if (text) return text.replace(re, '<mark class="doc-search-hit">$1</mark>');
+        return m;
+      });
+      const first = content.querySelector('mark.doc-search-hit');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    document.getElementById('inDocSearch').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') highlightInDoc();
+    });
+
+    function showInDocSearch(show) {
+      document.getElementById('inDocSearchWrap').style.display = show ? 'flex' : 'none';
+    }
+
+    if (initialDoc) {
+      loadDoc(initialDoc);
+    } else {
+      const lastDoc = localStorage.getItem('dial-bam-lastDoc');
+      if (lastDoc) loadDoc(lastDoc);
+    }
+  </script>
+</body>
+</html>

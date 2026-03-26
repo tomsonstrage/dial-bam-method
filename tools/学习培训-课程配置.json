@@ -1,0 +1,353 @@
+{
+  "categories": [
+    { "id": "strategy", "name": "战略管理", "desc": "宏观环境分析、战略规划与执行、目标分解" },
+    { "id": "digital", "name": "数字化转型", "desc": "转型路径、企业架构、流程与 IT 对齐" },
+    { "id": "business", "name": "业务分析", "desc": "需求分析、业务架构、规划拆解、BML 验证" }
+  ],
+  "courses": [
+    {
+      "id": "strategy-basics",
+      "title": "战略管理基础",
+      "category": "strategy",
+      "summary": "从洞察到战略规划，掌握 PESTEL、五力、SWOT 及战略解码方法。",
+      "chapters": [
+        { "title": "核心理念", "type": "doc", "url": "文档阅读.html?doc=00-核心理念.md" },
+        { "title": "Discovery 发现", "type": "doc", "url": "文档阅读.html?doc=02-Discovery.md" },
+        { "title": "洞察可视化", "type": "tool", "url": "洞察可视化.html" },
+        { "title": "痛点画布", "type": "tool", "url": "痛点画布.html" },
+        { "title": "Project Brief", "type": "tool", "url": "Project-Brief.html" },
+        { "title": "商业模式画布", "type": "tool", "url": "商业模式画布.html" }
+      ]
+    },
+    {
+      "id": "digital-transformation",
+      "title": "数字化转型路径",
+      "category": "digital",
+      "summary": "企业架构、流程分层、TAIITRE 国标与转型成熟度评估。",
+      "chapters": [
+        { "title": "Architecture 架构", "type": "doc", "url": "文档阅读.html?doc=04-Architecture.md" },
+        { "title": "参考框架索引", "type": "doc", "url": "文档阅读.html?doc=参考框架索引.md" },
+        { "title": "BAM 追溯矩阵", "type": "tool", "url": "BAM-追溯矩阵.html" },
+        { "title": "DIAL 流程可视化", "type": "tool", "url": "DIAL-流程可视化.html" },
+        { "title": "指导文档", "type": "doc", "url": "文档阅读.html?doc=指导文档/README.md" }
+      ]
+    },
+    {
+      "id": "business-analysis",
+      "title": "业务分析与交付",
+      "category": "business",
+      "summary": "需求验证、BAM 追溯、规划拆解与 BML 迭代。",
+      "chapters": [
+        { "title": "方法论", "type": "doc", "url": "文档阅读.html?doc=01-方法论.md" },
+        { "title": "Insight 洞察", "type": "doc", "url": "文档阅读.html?doc=03-Insight.md" },
+        { "title": "PRD 模板", "type": "tool", "url": "PRD-模板.html" },
+        { "title": "Launch 交付", "type": "doc", "url": "文档阅读.html?doc=05-Launch.md" },
+        { "title": "BAM 追溯矩阵", "type": "tool", "url": "BAM-追溯矩阵.html" },
+        { "title": "规划看板", "type": "tool", "url": "规划看板.html" },
+        { "title": "BML 验证看板", "type": "tool", "url": "BML-验证看板.html" },
+        { "title": "交付包导出", "type": "tool", "url": "交付包导出.html" }
+      ]
+    },
+    {
+      "id": "dial-quickstart",
+      "title": "DIAL 快速入门",
+      "category": "strategy",
+      "summary": "5 分钟上手 DIAL-BAM，从快速开始到核心理念。",
+      "chapters": [
+        { "title": "快速开始", "type": "doc", "url": "文档阅读.html?doc=快速开始.md" },
+        { "title": "企业案例", "type": "doc", "url": "文档阅读.html?doc=企业案例-销售线索管理数字化.md" },
+        { "title": "核心理念", "type": "doc", "url": "文档阅读.html?doc=00-核心理念.md" },
+        { "title": "方法论", "type": "doc", "url": "文档阅读.html?doc=01-方法论.md" },
+        { "title": "DIAL 流程可视化", "type": "tool", "url": "DIAL-流程可视化.html" },
+        { "title": "交付包导出", "type": "tool", "url": "交付包导出.html" }
+      ]
+    },
+    {
+      "id": "ai-enhance",
+      "title": "AI 增强与裁剪",
+      "category": "business",
+      "summary": "AI 时代的方法论适配、最小内核与可延伸设计。",
+      "chapters": [
+        { "title": "AI 增强与裁剪", "type": "doc", "url": "文档阅读.html?doc=06-AI增强与裁剪.md" },
+        { "title": "工具应用", "type": "doc", "url": "文档阅读.html?doc=工具应用.md" }
+      ]
+    }
+  ],
+  "roles": [
+    { "id": "exec", "name": "战略/高管", "focus": "核心理念、洞察、华为战略到执行", "courses": ["dial-quickstart", "strategy-basics"] },
+    { "id": "architect", "name": "业务架构师", "focus": "Architecture、TOGAF、BAM", "courses": ["digital-transformation", "business-analysis"] },
+    { "id": "pm", "name": "产品经理", "focus": "痛点画布、商业模式、BML", "courses": ["strategy-basics", "business-analysis"] },
+    { "id": "analyst", "name": "需求分析师", "focus": "Discovery、BABOK、BAM", "courses": ["strategy-basics", "business-analysis"] },
+    { "id": "pjm", "name": "项目经理", "focus": "Launch、IPD、PMBOK", "courses": ["business-analysis", "digital-transformation"] }
+  ],
+  "practices": [
+    {
+      "id": "practice-insight",
+      "title": "洞察分析实训",
+      "desc": "使用洞察可视化完成一次完整的 PESTEL + 五力 + SWOT 分析",
+      "category": "strategy",
+      "steps": [
+        { "title": "打开洞察可视化工具", "url": "洞察可视化.html" },
+        { "title": "填写 PESTEL 六维分析", "url": "洞察可视化.html" },
+        { "title": "填写波特五力分析", "url": "洞察可视化.html" },
+        { "title": "填写 SWOT 矩阵", "url": "洞察可视化.html" },
+        { "title": "导出或复制结论", "url": "洞察可视化.html" }
+      ]
+    },
+    {
+      "id": "practice-pain",
+      "title": "痛点验证实训",
+      "desc": "用痛点画布完成痛频量价分析与需求假设验证",
+      "category": "strategy",
+      "steps": [
+        { "title": "打开痛点画布", "url": "痛点画布.html" },
+        { "title": "填写痛频量价", "url": "痛点画布.html" },
+        { "title": "列出需求假设清单", "url": "痛点画布.html" },
+        { "title": "设定验证方式与状态", "url": "痛点画布.html" }
+      ]
+    },
+    {
+      "id": "practice-bam",
+      "title": "BAM 追溯实训",
+      "desc": "用 BAM 追溯矩阵建立 REQ→L1→L2→Epic→Story 映射",
+      "category": "business",
+      "steps": [
+        { "title": "打开 BAM 追溯矩阵", "url": "BAM-追溯矩阵.html" },
+        { "title": "填写业务域 L1", "url": "BAM-追溯矩阵.html" },
+        { "title": "填写 L2 模块与 Epic", "url": "BAM-追溯矩阵.html" },
+        { "title": "拆解 Story 与 L3/L4", "url": "BAM-追溯矩阵.html" },
+        { "title": "导出 JSON 备份", "url": "BAM-追溯矩阵.html" }
+      ]
+    },
+    {
+      "id": "practice-bml",
+      "title": "BML 验证实训",
+      "desc": "用 BML 验证看板记录一次 Build-Measure-Learn 循环",
+      "category": "business",
+      "steps": [
+        { "title": "打开 BML 验证看板", "url": "BML-验证看板.html" },
+        { "title": "记录假设与验证指标", "url": "BML-验证看板.html" },
+        { "title": "做出坚持/转向决策", "url": "BML-验证看板.html" }
+      ]
+    },
+    {
+      "id": "practice-bmc",
+      "title": "商业模式画布实训",
+      "desc": "用商业模式画布完成 9 宫格填写",
+      "category": "strategy",
+      "steps": [
+        { "title": "打开商业模式画布", "url": "商业模式画布.html" },
+        { "title": "填写客户细分与价值主张", "url": "商业模式画布.html" },
+        { "title": "填写渠道通路与客户关系", "url": "商业模式画布.html" },
+        { "title": "填写收入来源与成本结构", "url": "商业模式画布.html" },
+        { "title": "填写关键资源与关键活动", "url": "商业模式画布.html" }
+      ]
+    },
+    {
+      "id": "practice-plan",
+      "title": "规划看板实训",
+      "desc": "用规划看板完成 Epic/Story 短中长期规划",
+      "category": "business",
+      "steps": [
+        { "title": "打开规划看板", "url": "规划看板.html" },
+        { "title": "添加短期 Epic/Story", "url": "规划看板.html" },
+        { "title": "添加中期与长期规划", "url": "规划看板.html" }
+      ]
+    },
+    {
+      "id": "practice-delivery",
+      "title": "交付包导出实训",
+      "desc": "用交付包导出汇总各工具数据并完成完整性检查",
+      "category": "business",
+      "steps": [
+        { "title": "打开交付包导出", "url": "交付包导出.html" },
+        { "title": "查看各工具数据状态", "url": "交付包导出.html" },
+        { "title": "查看完整性检查结果", "url": "交付包导出.html" },
+        { "title": "导出交付包 JSON 备份", "url": "交付包导出.html" }
+      ]
+    }
+  ],
+  "exams": [
+    {
+      "id": "exam-basics",
+      "title": "DIAL-BAM 基础测验",
+      "desc": "核心理念与方法论基础",
+      "passScore": 60,
+      "questions": [
+        { "q": "DIAL 四个阶段依次是？", "options": [
+          { "text": "Discovery → Insight → Architecture → Launch", "correct": true },
+          { "text": "Design → Implement → Analyze → Launch", "correct": false },
+          { "text": "Discover → Insight → Action → Learn", "correct": false }
+        ]},
+        { "q": "BAM 追溯链包含哪些层级？", "options": [
+          { "text": "REQ → L1 → L2 → Epic → Story → L3 → L4", "correct": true },
+          { "text": "Requirement → Feature → Task", "correct": false },
+          { "text": "L1 → L2 → L3 仅三层", "correct": false }
+        ]},
+        { "q": "四大核心理念不包括？", "options": [
+          { "text": "战略导向、流程分层、端到端追溯、闭环管理", "correct": false },
+          { "text": "敏捷迭代", "correct": true },
+          { "text": "闭环管理", "correct": false }
+        ]},
+        { "q": "痛频量价用于？", "options": [
+          { "text": "需求优先级评估", "correct": true },
+          { "text": "代码质量度量", "correct": false },
+          { "text": "项目进度跟踪", "correct": false }
+        ]},
+        { "q": "MVP 的含义是？", "options": [
+          { "text": "最小可行产品，用于快速验证假设", "correct": true },
+          { "text": "最大价值产品", "correct": false },
+          { "text": "多版本发布", "correct": false }
+        ]},
+        { "q": "华为流程分层 L1/L2/L3/L4 分别对应？", "options": [
+          { "text": "业务域 → 模块 → 动作 → 步骤", "correct": true },
+          { "text": "需求 → 功能 → 任务 → 子任务", "correct": false },
+          { "text": "战略 → 战术 → 执行 → 复盘", "correct": false }
+        ]},
+        { "q": "BML 循环来自？", "options": [
+          { "text": "精益创业，Build-Measure-Learn", "correct": true },
+          { "text": "敏捷开发 Scrum", "correct": false },
+          { "text": "瀑布模型", "correct": false }
+        ]},
+        { "q": "PESTEL 分析不包含？", "options": [
+          { "text": "政治、经济、社会、技术、环境、法律", "correct": false },
+          { "text": "竞争格局", "correct": true },
+          { "text": "技术趋势", "correct": false }
+        ]},
+        { "q": "TOGAF 主要用于？", "options": [
+          { "text": "企业架构（业务→应用→数据→技术）", "correct": true },
+          { "text": "项目管理", "correct": false },
+          { "text": "需求分析", "correct": false }
+        ]}
+      ]
+    },
+    {
+      "id": "exam-discovery",
+      "title": "Discovery 阶段测验",
+      "desc": "洞察、痛点、需求假设、Project Brief",
+      "passScore": 60,
+      "questions": [
+        { "q": "Discovery 阶段的主要产出是？", "options": [
+          { "text": "L1 一级业务域、Project Brief、需求假设清单", "correct": true },
+          { "text": "Epic、Story、技术架构", "correct": false },
+          { "text": "BML 迭代记录", "correct": false }
+        ]},
+        { "q": "PESTEL 包含哪些维度？", "options": [
+          { "text": "政治、经济、社会、技术、环境、法律", "correct": true },
+          { "text": "优势、劣势、机会、威胁", "correct": false },
+          { "text": "同业竞争、供应商、购买者、替代品、新进入者", "correct": false }
+        ]},
+        { "q": "痛频量价中「痛」指？", "options": [
+          { "text": "用户/客户的核心痛点", "correct": true },
+          { "text": "产品功能", "correct": false },
+          { "text": "技术难点", "correct": false }
+        ]},
+        { "q": "需求假设的验证方式不包括？", "options": [
+          { "text": "试点、访谈、A/B 测试、MVP", "correct": false },
+          { "text": "直接上线全量发布", "correct": true },
+          { "text": "用户调研", "correct": false }
+        ]},
+        { "q": "Project Brief 的核心字段包括？", "options": [
+          { "text": "项目背景、目标市场、价值主张、L1 业务域", "correct": true },
+          { "text": "Epic、Story、L3/L4", "correct": false },
+          { "text": "技术栈、数据库设计", "correct": false }
+        ]},
+        { "q": "洞察可视化工具支持导出哪些格式？", "options": [
+          { "text": "JSON、文本、AI 提示词", "correct": true },
+          { "text": "仅 PDF", "correct": false },
+          { "text": "仅 Excel", "correct": false }
+        ]}
+      ]
+    },
+    {
+      "id": "exam-architecture",
+      "title": "Architecture 阶段测验",
+      "desc": "业务分解、BAM 追溯、Epic/Story、L3/L4",
+      "passScore": 60,
+      "questions": [
+        { "q": "L1/L2/L3/L4 的层级关系是？", "options": [
+          { "text": "L1 业务域 → L2 模块 → L3 动作 → L4 步骤", "correct": true },
+          { "text": "L1 需求 → L2 功能 → L3 任务", "correct": false },
+          { "text": "L1 战略 → L2 战术 → L3 执行", "correct": false }
+        ]},
+        { "q": "BAM 追溯链的完整映射是？", "options": [
+          { "text": "REQ → L1 → L2 ↔ Epic ↔ Story ↔ L3 → L4", "correct": true },
+          { "text": "Requirement → Feature → Task", "correct": false },
+          { "text": "Epic → Story → Bug", "correct": false }
+        ]},
+        { "q": "Epic 与 L2 的关系是？", "options": [
+          { "text": "Epic 对应 L2 模块，一个 L2 可拆 1-N 个 Epic", "correct": true },
+          { "text": "Epic 与 L2 无关联", "correct": false },
+          { "text": "Epic 等同于 L1", "correct": false }
+        ]},
+        { "q": "L3 业务动作的拆解原则是？", "options": [
+          { "text": "用户可感知的原子动作", "correct": true },
+          { "text": "技术实现步骤", "correct": false },
+          { "text": "数据库表设计", "correct": false }
+        ]},
+        { "q": "差距分析关注？", "options": [
+          { "text": "现状 vs 目标、演进路径", "correct": true },
+          { "text": "代码覆盖率", "correct": false },
+          { "text": "测试用例数", "correct": false }
+        ]},
+        { "q": "规划看板中 horizon 的可选值是？", "options": [
+          { "text": "short、medium、long", "correct": true },
+          { "text": "P1、P2、P3", "correct": false },
+          { "text": "todo、done", "correct": false }
+        ]}
+      ]
+    },
+    {
+      "id": "exam-launch",
+      "title": "Launch 阶段测验",
+      "desc": "BML 验证、坚持/转向、规划执行",
+      "passScore": 60,
+      "questions": [
+        { "q": "BML 循环的三个阶段是？", "options": [
+          { "text": "Build-Measure-Learn", "correct": true },
+          { "text": "Plan-Do-Check-Act", "correct": false },
+          { "text": "Design-Implement-Test", "correct": false }
+        ]},
+        { "q": "BML 验证后可能的决策是？", "options": [
+          { "text": "坚持或转向", "correct": true },
+          { "text": "仅坚持", "correct": false },
+          { "text": "仅放弃", "correct": false }
+        ]},
+        { "q": "BML 迭代的 scope 字段用于？", "options": [
+          { "text": "关联 Epic/Story，追溯验证范围", "correct": true },
+          { "text": "记录代码行数", "correct": false },
+          { "text": "记录会议时间", "correct": false }
+        ]},
+        { "q": "规划看板可从哪里导入数据？", "options": [
+          { "text": "BAM 追溯矩阵", "correct": true },
+          { "text": "仅手动填写", "correct": false },
+          { "text": "从 Jira 同步", "correct": false }
+        ]},
+        { "q": "交付包导出包含哪些工具数据？", "options": [
+          { "text": "洞察、痛点、BMC、Project Brief、PRD、BAM、规划、BML", "correct": true },
+          { "text": "仅 BAM", "correct": false },
+          { "text": "仅代码", "correct": false }
+        ]},
+        { "q": "Launch 阶段的核心目标是？", "options": [
+          { "text": "验证假设、迭代交付、坚持/转向决策", "correct": true },
+          { "text": "完成需求文档", "correct": false },
+          { "text": "完成技术选型", "correct": false }
+        ]}
+      ]
+    }
+  ],
+  "certifications": [
+    {
+      "id": "cert-dial-bam",
+      "name": "DIAL-BAM 入门认证",
+      "desc": "完成学习、实训与考试，掌握方法论基础",
+      "requirements": { "studyPct": 30, "practiceCount": 1, "examScore": 60 }
+    },
+    {
+      "id": "cert-dial-bam-adv",
+      "name": "DIAL-BAM 进阶认证",
+      "desc": "深入学习与多场景实训，全面掌握方法论",
+      "requirements": { "studyPct": 50, "practiceCount": 3, "examScore": 70 }
+    }
+  ]
+}

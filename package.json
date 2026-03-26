@@ -1,0 +1,33 @@
+{
+  "name": "dial-bam-method",
+  "version": "1.5.0",
+  "description": "业务分析及软件开发体系：DIAL+BAM，融合华为流程、IPD、TOGAF，行业分析→需求→方案→数字化→规划→任务拆解",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/dial-bam-method.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "methodology",
+    "bam",
+    "dial",
+    "bmad",
+    "lean-startup",
+    "product-development",
+    "business-architecture"
+  ],
+  "scripts": {
+    "serve": "npx serve . -p 3789",
+    "start": "npx serve . -p 3789",
+    "init": "node scripts/init.js"
+  },
+  "bin": {
+    "dial-bam-method": "./scripts/init.js"
+  },
+  "files": [
+    "docs",
+    "tools",
+    "tools/templates",
+    "scripts"
+  ]
+}

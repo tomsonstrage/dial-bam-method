@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Brief - DIAL-BAM Method</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .section h3 { font-size: 1rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+    .section .hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .section textarea, .section input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .section textarea { min-height: 80px; resize: vertical; }
+    .section input { min-height: 2rem; }
+    .l1-list { margin-top: 0.5rem; }
+    .l1-item {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .l1-item input { flex: 1; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .btn:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .section textarea, .section input { font-size: 16px; }
+      .actions .btn { min-height: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Project Brief</h1>
+  <p class="meta">项目简报 — 项目背景、目标市场、价值主张、L1 业务域、范围边界（Discovery 阶段）</p>
+
+  <div class="section">
+    <h3>项目背景</h3>
+    <textarea id="background" placeholder="行业背景、市场机会、项目缘起"></textarea>
+  </div>
+
+  <div class="section">
+    <h3>目标市场</h3>
+    <input type="text" id="targetMarket" placeholder="TAM/SAM/SOM、目标用户细分">
+    <div class="hint">TAM（总市场）→ SAM（可服务）→ SOM（可获取）</div>
+  </div>
+
+  <div class="section">
+    <h3>价值主张</h3>
+    <textarea id="valueProp" placeholder="一句话说明：为谁解决什么问题"></textarea>
+  </div>
+
+  <div class="section">
+    <h3>核心假设（痛频量价）</h3>
+    <textarea id="assumptions" placeholder="痛频量价结论、关键假设、待验证点"></textarea>
+    <div class="hint">可从痛点画布复制结论</div>
+  </div>
+
+  <div class="section">
+    <h3>L1 业务域列表</h3>
+    <div class="l1-list" id="l1List"></div>
+    <button class="btn btn-sm" onclick="addL1()">+ 新增 L1</button>
+    <div class="hint">可从 BAM 追溯矩阵导入</div>
+  </div>
+
+  <div class="section">
+    <h3>范围边界</h3>
+    <textarea id="scope" placeholder="在范围内：包含哪些功能/业务域"></textarea>
+  </div>
+
+  <div class="section">
+    <h3>排除项</h3>
+    <textarea id="exclusions" placeholder="排除在外的：明确不做、暂不处理"></textarea>
+  </div>
+
+  <div class="actions">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <input type="file" id="fileImport" accept=".json" style="display:none">
+    <button class="btn" onclick="downloadTemplate()">下载模板</button>
+    <button class="btn" onclick="document.getElementById('fileImport').click()">导入 JSON</button>
+    <button class="btn" onclick="exportJSON()">导出 JSON</button>
+    <button class="btn" onclick="exportMD()">导出 Markdown</button>
+    <button class="btn" onclick="fromBAM()">从 BAM 导入 L1</button>
+    <button class="btn" onclick="fromPain()">从痛点画布复制痛频量价</button>
+    <a href="痛点画布.html" class="btn">← 痛点画布</a>
+    <a href="BAM-追溯矩阵.html" class="btn">→ BAM 追溯矩阵</a>
+    <button class="btn" onclick="clearAll()">清空</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'dial-bam-projectbrief';
+    const FIELDS = ['background','targetMarket','valueProp','assumptions','scope','exclusions'];
+
+    function load() {
+      try {
+        const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        FIELDS.forEach(k => { const el = document.getElementById(k); if (el && d[k]) el.value = d[k]; });
+        if (d.L1 && Array.isArray(d.L1)) data.L1 = d.L1;
+      } catch (_) {}
+    }
+    function save() {
+      const d = {};
+      FIELDS.forEach(k => { const el = document.getElementById(k); if (el) d[k] = el.value; });
+      d.L1 = data.L1;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    }
+    document.querySelectorAll('.section textarea, .section input').forEach(el => {
+      if (el.id && FIELDS.includes(el.id)) el.addEventListener('input', save);
+    });
+
+    async function downloadTemplate() {
+      try {
+        const r = await fetch('templates/Project-Brief-模板.json');
+        const t = r.ok ? await r.json() : { meta:{name:'Project Brief',updated:''}, background:'',targetMarket:'',valueProp:'',assumptions:'',scope:'',exclusions:'',L1:[] };
+        delete t._comment;
+        const blob = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'Project-Brief-模板.json';
+        a.click();
+      } catch (_) {
+        const t = { meta:{name:'Project Brief',updated:''}, background:'',targetMarket:'',valueProp:'',assumptions:'',scope:'',exclusions:'',L1:[] };
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' }));
+        a.download = 'Project-Brief-模板.json';
+        a.click();
+      }
+    }
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const d = JSON.parse(r.result);
+          FIELDS.forEach(k => { const el = document.getElementById(k); if (el && d[k] !== undefined) el.value = d[k]; });
+          if (Array.isArray(d.L1)) data.L1 = d.L1;
+          save();
+          renderL1();
+          alert('导入成功');
+        } catch (err) { alert('导入失败：' + (err.message || '无效 JSON')); }
+        e.target.value = '';
+      };
+      r.readAsText(f, 'UTF-8');
+    });
+
+    let data = { L1: [] };
+
+    function renderL1() {
+      const list = document.getElementById('l1List');
+      list.innerHTML = '';
+      (data.L1 || []).forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'l1-item';
+        div.innerHTML = `
+          <input type="text" value="${escapeHtml(item.id||'')}" placeholder="L1-01" onchange="updateL1(${i},'id',this.value)">
+          <input type="text" value="${escapeHtml(item.name||'')}" placeholder="一级业务域名称" onchange="updateL1(${i},'name',this.value)">
+          <button class="btn btn-sm" onclick="delL1(${i})">删除</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+    function escapeHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+    function updateL1(i, k, v) { data.L1[i] = data.L1[i] || {}; data.L1[i][k] = v; save(); renderL1(); }
+    function addL1() {
+      data.L1 = data.L1 || [];
+      data.L1.push({ id: 'L1-' + String(data.L1.length + 1).padStart(2,'0'), name: '' });
+      save();
+      renderL1();
+    }
+    function delL1(i) { data.L1.splice(i, 1); save(); renderL1(); }
+
+    function fromPain() {
+      try {
+        const d = JSON.parse(localStorage.getItem('dial-bam-pain') || '{}');
+        const labels = { pain:'痛', freq:'频', vol:'量', price:'价' };
+        let s = '';
+        ['pain','freq','vol','price'].forEach(k => {
+          if (d[k]) s += labels[k] + '：' + d[k] + '\n\n';
+        });
+        if (d.hypotheses && d.hypotheses.length) {
+          s += '需求假设：\n';
+          d.hypotheses.forEach(h => s += `- ${h.id||''} ${h.hyp||''}（${h.status==='done'?'已验证':'待验证'}）\n`);
+        }
+        if (s) {
+          document.getElementById('assumptions').value = s.trim();
+          save();
+          alert('已从痛点画布复制到核心假设。');
+        } else { alert('痛点画布无数据。'); }
+      } catch (e) { alert('读取失败：' + (e.message || '无效数据')); }
+    }
+
+    function fromBAM() {
+      try {
+        const raw = localStorage.getItem('dial-bam-matrix');
+        if (!raw) { alert('BAM 追溯矩阵无数据，请先填写或导入。'); return; }
+        const m = JSON.parse(raw);
+        if (m.L1 && Array.isArray(m.L1) && m.L1.length > 0) {
+          data.L1 = m.L1.map(x => ({ id: x.id || x.code, name: x.name || x.title || '' }));
+          save();
+          renderL1();
+          alert('已从 BAM 导入 ' + data.L1.length + ' 个 L1。');
+        } else { alert('BAM 中无 L1 数据。'); }
+      } catch (e) { alert('读取 BAM 失败：' + (e.message || '无效数据')); }
+    }
+
+    function exportJSON() {
+      const d = { meta: { name: 'Project Brief', updated: new Date().toISOString().slice(0,10) } };
+      FIELDS.forEach(k => { const el = document.getElementById(k); if (el) d[k] = el.value; });
+      d.L1 = data.L1;
+      const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Project-Brief-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+    }
+
+    function exportMD() {
+      const labels = { background:'项目背景', targetMarket:'目标市场', valueProp:'价值主张', assumptions:'核心假设', scope:'范围边界', exclusions:'排除项' };
+      let md = '# Project Brief\n\n';
+      FIELDS.forEach(k => {
+        const el = document.getElementById(k);
+        const v = el ? el.value : '';
+        if (v) md += '## ' + labels[k] + '\n\n' + v + '\n\n';
+      });
+      if (data.L1 && data.L1.length > 0) {
+        md += '## L1 业务域列表\n\n| 编号 | 名称 |\n|------|------|\n';
+        data.L1.forEach(x => md += `| ${x.id||'-'} | ${x.name||'-'} |\n`);
+      }
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Project-Brief-' + new Date().toISOString().slice(0,10) + '.md';
+      a.click();
+    }
+
+    function clearAll() {
+      if (confirm('确定清空？')) {
+        FIELDS.forEach(k => { const el = document.getElementById(k); if (el) el.value = ''; });
+        data.L1 = [];
+        localStorage.removeItem(STORAGE_KEY);
+        renderL1();
+      }
+    }
+
+    load();
+    renderL1();
+  </script>
+</body>
+</html>

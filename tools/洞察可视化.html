@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>洞察可视化 - PESTEL / 五力 / SWOT - DIAL-BAM Method</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.6rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .tab:hover { color: var(--text); border-color: var(--accent); }
+    .tab.active { color: var(--accent); border-color: var(--accent); background: var(--surface2); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .card h3 {
+      font-size: 1rem;
+      margin: 0 0 0.75rem 0;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .card textarea {
+      width: 100%;
+      min-height: 80px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+    .card textarea::placeholder { color: var(--text-muted); }
+    .card .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+    .swot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      max-width: 800px;
+    }
+    .swot-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .swot-cell.s { border-left: 4px solid var(--success); }
+    .swot-cell.w { border-left: 4px solid var(--warning); }
+    .swot-cell.o { border-left: 4px solid var(--accent); }
+    .swot-cell.t { border-left: 4px solid var(--danger); }
+    .swot-cell h3 { margin: 0 0 0.5rem 0; font-size: 1rem; }
+    .actions {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .workflow-bar a { color: var(--text-muted); text-decoration: none; }
+    .workflow-bar a:hover { color: var(--accent); }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .swot-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>洞察可视化</h1>
+  <p class="meta">PESTEL、波特五力、SWOT — 结构化填写，支持导出与 AI 辅助</p>
+  <nav class="workflow-bar" style="display:flex;flex-wrap:wrap;gap:0.25rem;font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">
+    <a href="index.html">工具中心</a><span style="color:var(--border)">→</span>
+    <span style="color:var(--accent)">洞察</span><span style="color:var(--border)">→</span>
+    <a href="痛点画布.html">痛点</a><span style="color:var(--border)">→</span>
+    <a href="BAM-追溯矩阵.html">BAM</a><span style="color:var(--border)">→</span>
+    <a href="交付包导出.html">交付包</a>
+  </nav>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="pestel">PESTEL</button>
+    <button class="tab" data-tab="porter">波特五力</button>
+    <button class="tab" data-tab="swot">SWOT</button>
+  </div>
+
+  <div id="panel-pestel" class="panel active">
+    <div class="grid">
+      <div class="card">
+        <h3>P - Political 政治</h3>
+        <textarea id="p" placeholder="政策、法规、政府导向、政府补贴等"></textarea>
+        <div class="hint">政府政策、法规、税收、监管等</div>
+      </div>
+      <div class="card">
+        <h3>E - Economic 经济</h3>
+        <textarea id="e" placeholder="GDP、利率、汇率、消费能力等"></textarea>
+        <div class="hint">宏观经济、消费能力、融资环境</div>
+      </div>
+      <div class="card">
+        <h3>S - Social 社会</h3>
+        <textarea id="s" placeholder="人口、文化、消费习惯、趋势等"></textarea>
+        <div class="hint">人口结构、文化价值观、消费习惯</div>
+      </div>
+      <div class="card">
+        <h3>T - Technological 技术</h3>
+        <textarea id="t" placeholder="技术成熟度、成本、替代性等"></textarea>
+        <div class="hint">科技创新、自动化、AI、技术成本</div>
+      </div>
+      <div class="card">
+        <h3>E - Environmental 环境</h3>
+        <textarea id="env" placeholder="环保、可持续、碳政策等"></textarea>
+        <div class="hint">气候变化、资源可持续、碳排放</div>
+      </div>
+      <div class="card">
+        <h3>L - Legal 法律</h3>
+        <textarea id="l" placeholder="劳动法、知识产权、消费者保护等"></textarea>
+        <div class="hint">劳动法、知识产权、消费者保护</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-porter" class="panel">
+    <div class="grid">
+      <div class="card">
+        <h3>同业竞争者的实力</h3>
+        <textarea id="c1" placeholder="现有企业之间的竞争强度"></textarea>
+      </div>
+      <div class="card">
+        <h3>供应商的议价能力</h3>
+        <textarea id="c2" placeholder="上游供应商的讨价还价能力"></textarea>
+      </div>
+      <div class="card">
+        <h3>购买者的议价能力</h3>
+        <textarea id="c3" placeholder="客户对价格和服务的控制力"></textarea>
+      </div>
+      <div class="card">
+        <h3>替代品的威胁</h3>
+        <textarea id="c4" placeholder="来自其他行业的替代产品或服务"></textarea>
+      </div>
+      <div class="card">
+        <h3>新进入者的威胁</h3>
+        <textarea id="c5" placeholder="潜在竞争对手进入市场的容易程度"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-swot" class="panel">
+    <div class="swot-grid">
+      <div class="swot-cell s">
+        <h3>Strengths 优势</h3>
+        <textarea id="sw1" placeholder="企业内部竞争优势"></textarea>
+      </div>
+      <div class="swot-cell w">
+        <h3>Weaknesses 劣势</h3>
+        <textarea id="sw2" placeholder="企业存在的不足"></textarea>
+      </div>
+      <div class="swot-cell o">
+        <h3>Opportunities 机会</h3>
+        <textarea id="sw3" placeholder="外部环境提供的有利条件"></textarea>
+      </div>
+      <div class="swot-cell t">
+        <h3>Threats 威胁</h3>
+        <textarea id="sw4" placeholder="外部环境构成的压力"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <input type="file" id="fileImport" accept=".json" style="display:none">
+    <button class="btn" onclick="downloadTemplate()">下载模板</button>
+    <button class="btn" onclick="document.getElementById('fileImport').click()">导入 JSON</button>
+    <button class="btn" onclick="exportText()">导出为文本</button>
+    <button class="btn" onclick="exportJSON()">导出为 JSON</button>
+    <button class="btn primary" onclick="copyForAI()">复制为 AI 提示词</button>
+    <button class="btn primary" onclick="copyForBAM()">生成 BAM 需求初稿</button>
+    <button class="btn primary" onclick="pushToPain()">推送到痛点画布 →</button>
+    <a href="痛点画布.html" class="btn">→ 痛点画布</a>
+    <a href="BAM-追溯矩阵.html" class="btn">→ BAM 追溯矩阵</a>
+    <button class="btn" onclick="clearAll()">清空</button>
+  </div>
+
+  <script>
+    const storageKey = 'dial-bam-insight';
+
+    function getValues() {
+      const pestel = { p: id('p'), e: id('e'), s: id('s'), t: id('t'), env: id('env'), l: id('l') };
+      const porter = { c1: id('c1'), c2: id('c2'), c3: id('c3'), c4: id('c4'), c5: id('c5') };
+      const swot = { sw1: id('sw1'), sw2: id('sw2'), sw3: id('sw3'), sw4: id('sw4') };
+      return { pestel, porter, swot };
+    }
+
+    function id(x) { return document.getElementById(x).value; }
+
+    function load() {
+      try {
+        const d = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        Object.entries(d).forEach(([k, v]) => {
+          const el = document.getElementById(k);
+          if (el) el.value = v;
+        });
+      } catch (_) {}
+    }
+
+    function save() {
+      const d = {};
+      ['p','e','s','t','env','l','c1','c2','c3','c4','c5','sw1','sw2','sw3','sw4'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el) d[k] = el.value;
+      });
+      localStorage.setItem(storageKey, JSON.stringify(d));
+    }
+
+    document.querySelectorAll('textarea').forEach(el => {
+      el.addEventListener('input', save);
+    });
+
+    const INSIGHT_KEYS = ['p','e','s','t','env','l','c1','c2','c3','c4','c5','sw1','sw2','sw3','sw4'];
+    const INSIGHT_TEMPLATE = { p:'',e:'',s:'',t:'',env:'',l:'',c1:'',c2:'',c3:'',c4:'',c5:'',sw1:'',sw2:'',sw3:'',sw4:'' };
+    async function downloadTemplate() {
+      try {
+        const r = await fetch('templates/洞察可视化-模板.json');
+        const t = r.ok ? await r.json() : INSIGHT_TEMPLATE;
+        delete t._comment;
+        const blob = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '洞察可视化-模板.json';
+        a.click();
+      } catch (_) {
+        const blob = new Blob([JSON.stringify(INSIGHT_TEMPLATE, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = '洞察可视化-模板.json';
+        a.click();
+      }
+    }
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const d = JSON.parse(r.result);
+          INSIGHT_KEYS.forEach(k => { const el = document.getElementById(k); if (el && d[k] !== undefined) el.value = d[k]; });
+          save();
+          alert('导入成功');
+        } catch (err) { alert('导入失败：' + (err.message || '无效 JSON')); }
+        e.target.value = '';
+      };
+      r.readAsText(f, 'UTF-8');
+    });
+
+    function exportText() {
+      const v = getValues();
+      const text = `
+PESTEL
+- Political: ${v.pestel.p}
+- Economic: ${v.pestel.e}
+- Social: ${v.pestel.s}
+- Technological: ${v.pestel.t}
+- Environmental: ${v.pestel.env}
+- Legal: ${v.pestel.l}
+
+波特五力
+- 同业竞争: ${v.porter.c1}
+- 供应商议价: ${v.porter.c2}
+- 购买者议价: ${v.porter.c3}
+- 替代品威胁: ${v.porter.c4}
+- 新进入者威胁: ${v.porter.c5}
+
+SWOT
+- 优势: ${v.swot.sw1}
+- 劣势: ${v.swot.sw2}
+- 机会: ${v.swot.sw3}
+- 威胁: ${v.swot.sw4}
+`.trim();
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '洞察分析-' + new Date().toISOString().slice(0,10) + '.txt';
+      a.click();
+    }
+
+    function exportJSON() {
+      const d = { ...INSIGHT_TEMPLATE };
+      INSIGHT_KEYS.forEach(k => {
+        const el = document.getElementById(k);
+        if (el) d[k] = el.value;
+      });
+      const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '洞察分析-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+    }
+
+    function copyForAI() {
+      const v = getValues();
+      const prompt = `请基于以下五维洞察，生成战略规划要点与业务需求方向建议：
+
+【PESTEL】
+- 政治: ${v.pestel.p || '（待填写）'}
+- 经济: ${v.pestel.e || '（待填写）'}
+- 社会: ${v.pestel.s || '（待填写）'}
+- 技术: ${v.pestel.t || '（待填写）'}
+- 环境: ${v.pestel.env || '（待填写）'}
+- 法律: ${v.pestel.l || '（待填写）'}
+
+【波特五力】
+- 同业竞争: ${v.porter.c1 || '（待填写）'}
+- 供应商议价: ${v.porter.c2 || '（待填写）'}
+- 购买者议价: ${v.porter.c3 || '（待填写）'}
+- 替代品威胁: ${v.porter.c4 || '（待填写）'}
+- 新进入者威胁: ${v.porter.c5 || '（待填写）'}
+
+【SWOT】
+- 优势: ${v.swot.sw1 || '（待填写）'}
+- 劣势: ${v.swot.sw2 || '（待填写）'}
+- 机会: ${v.swot.sw3 || '（待填写）'}
+- 威胁: ${v.swot.sw4 || '（待填写）'}
+
+请输出：1) 战略方向建议；2) 业务需求类型（运营提效/新增业务）及优先级；3) 风险与应对。`;
+      navigator.clipboard.writeText(prompt).then(() => alert('已复制到剪贴板，可粘贴到 AI 对话中'));
+    }
+
+    function pushToPain() {
+      const v = getValues();
+      const summary = `【洞察结论 → 痛点分析输入】
+机会与威胁（来自 SWOT）：${v.swot.sw3 || '（待填写）'} | ${v.swot.sw4 || '（待填写）'}
+社会与需求趋势（PESTEL-S）：${v.pestel.s || '（待填写）'}
+竞争格局（五力）：同业${v.porter.c1 || ''} 替代品${v.porter.c4 || ''} 新进入者${v.porter.c5 || ''}
+技术可行性（PESTEL-T）：${v.pestel.t || '（待填写）'}
+
+请基于以上洞察，提炼用户痛点与需求假设。`;
+      try {
+        localStorage.setItem('dial-bam-insight-for-pain', JSON.stringify({
+          summary,
+          updated: new Date().toISOString()
+        }));
+        window.location.href = '痛点画布.html?from=insight';
+      } catch (e) {
+        alert('推送失败：' + (e.message || '请检查浏览器存储'));
+      }
+    }
+
+    function copyForBAM() {
+      const v = getValues();
+      const prompt = `请基于以下五维洞察，生成 BAM 追溯矩阵的 JSON 初稿。输出格式必须为纯 JSON，可直接导入 BAM 追溯矩阵工具。
+
+【洞察输入】
+PESTEL: 政治${v.pestel.p||''} 经济${v.pestel.e||''} 社会${v.pestel.s||''} 技术${v.pestel.t||''} 环境${v.pestel.env||''} 法律${v.pestel.l||''}
+波特五力: 同业${v.porter.c1||''} 供应商${v.porter.c2||''} 购买者${v.porter.c3||''} 替代品${v.porter.c4||''} 新进入者${v.porter.c5||''}
+SWOT: 优势${v.swot.sw1||''} 劣势${v.swot.sw2||''} 机会${v.swot.sw3||''} 威胁${v.swot.sw4||''}
+
+请输出符合以下结构的 JSON（仅输出 JSON，不要其他说明）：
+{
+  "meta": { "name": "项目名", "version": "1.0", "updated": "YYYY-MM-DD", "description": "REQ ↔ L1 ↔ L2 ↔ Epic ↔ Story ↔ L3 ↔ L4" },
+  "L1": [{"id": "L1-01", "name": "一级业务域", "desc": "描述"}],
+  "L2": [{"id": "L2-01", "name": "二级模块", "route": "/path", "L1": "L1-01"}],
+  "requirements": [{"id": "REQ-001", "name": "需求名", "priority": "P1", "L1": ["L1-01"], "L2": ["L2-01"], "epic": "EPIC-1"}],
+  "epics": [{"id": "EPIC-1", "name": "Epic名", "reqs": ["REQ-001"], "L2": ["L2-01"]}],
+  "stories": [{"id": "S1.1", "epic": "EPIC-1", "name": "用户故事", "L3": ["L3-01-01"]}],
+  "L3": [{"id": "L3-01-01", "name": "业务动作", "L2": "L2-01", "L4": ["步骤1", "步骤2"]}]
+}`;
+      navigator.clipboard.writeText(prompt).then(() => alert('已复制 BAM 生成提示词。粘贴到 AI 获取 JSON 后，在 BAM 追溯矩阵中点击「导入 JSON」即可。'));
+    }
+
+    function clearAll() {
+      if (confirm('确定清空所有内容？')) {
+        ['p','e','s','t','env','l','c1','c2','c3','c4','c5','sw1','sw2','sw3','sw4'].forEach(k => {
+          const el = document.getElementById(k);
+          if (el) el.value = '';
+        });
+        localStorage.removeItem(storageKey);
+      }
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    load();
+  </script>
+</body>
+</html>

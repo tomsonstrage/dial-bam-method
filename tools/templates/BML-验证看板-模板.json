@@ -1,0 +1,16 @@
+{
+  "_comment": "BML 验证看板 输入/输出模板。填写各字段值后导入。",
+  "meta": {
+    "name": "BML 验证看板",
+    "updated": "YYYY-MM-DD"
+  },
+  "iterations": [
+    {
+      "scope": "",
+      "build": "",
+      "measure": "",
+      "learn": "",
+      "decision": ""
+    }
+  ]
+}

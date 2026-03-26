@@ -1,0 +1,16 @@
+{
+  "_comment": "商业模式画布 输入/输出模板。填写各字段值后导入。",
+  "meta": {
+    "name": "商业模式画布",
+    "updated": "YYYY-MM-DD"
+  },
+  "partners": "",
+  "activities": "",
+  "resources": "",
+  "value": "",
+  "relationships": "",
+  "channels": "",
+  "segments": "",
+  "costs": "",
+  "revenue": ""
+}

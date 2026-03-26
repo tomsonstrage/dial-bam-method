@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BML 验证看板 - DIAL-BAM Method</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .bml-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .bml-phase {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .bml-arrow { color: var(--text-muted); font-size: 1.2rem; }
+    .iterations {
+      margin-bottom: 1.5rem;
+    }
+    .iter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .iter-card h3 {
+      font-size: 1rem;
+      margin: 0 0 0.75rem 0;
+      color: var(--accent);
+    }
+    .iter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 800px) { .iter-grid { grid-template-columns: 1fr; } }
+    .iter-cell {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    .iter-cell h4 { font-size: 0.85rem; margin: 0 0 0.5rem 0; color: var(--text-muted); }
+    .iter-cell textarea {
+      width: 100%;
+      min-height: 60px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      padding: 0.4rem;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+    .iter-cell.pivot { border-left: 4px solid var(--warning); }
+    .iter-cell.pivot h4 { color: var(--warning); }
+    .badge { font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px; }
+    .badge-persist { background: var(--success); color: #fff; }
+    .badge-pivot { background: var(--warning); color: #000; }
+    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .iter-actions { margin-top: 0.5rem; }
+    .btn:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .bml-flow { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <h1>BML 验证看板</h1>
+  <p class="meta">Build-Measure-Learn 循环 — 构建 → 测量 → 学习 → 坚持/转向（Launch 阶段）</p>
+
+  <div class="bml-flow">
+    <span class="bml-phase">Build 构建</span>
+    <span class="bml-arrow">→</span>
+    <span class="bml-phase">Measure 测量</span>
+    <span class="bml-arrow">→</span>
+    <span class="bml-phase">Learn 学习</span>
+    <span class="bml-arrow">→</span>
+    <span class="bml-phase">坚持/转向</span>
+  </div>
+
+  <div class="iterations" id="iterations"></div>
+  <button class="btn btn-sm" onclick="addIteration()">+ 新增迭代</button>
+
+  <p class="meta" style="margin-top:0.5rem">填写「关联 Epic/Story」可追溯验证范围，与 BAM 追溯矩阵、规划看板对应</p>
+
+  <div class="actions">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <input type="file" id="fileImport" accept=".json" style="display:none">
+    <button class="btn" onclick="downloadTemplate()">下载模板</button>
+    <button class="btn" onclick="document.getElementById('fileImport').click()">导入 JSON</button>
+    <button class="btn" onclick="copyPlanningScope()">从规划看板复制 Epic 列表</button>
+    <button class="btn" onclick="exportJSON()">导出 JSON</button>
+    <button class="btn" onclick="exportText()">导出文本</button>
+    <button class="btn primary" onclick="copyForAI()">复制为 AI 提示词</button>
+    <a href="规划看板.html" class="btn">← 规划看板</a>
+    <a href="BAM-追溯矩阵.html" class="btn">→ BAM 追溯矩阵</a>
+    <button class="btn" onclick="clearAll()">清空</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'dial-bam-bml';
+    let data = { iterations: [] };
+
+    function load() {
+      try {
+        const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        if (d.iterations) data.iterations = d.iterations;
+      } catch (_) {}
+    }
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function render() {
+      const container = document.getElementById('iterations');
+      container.innerHTML = '';
+      (data.iterations || []).forEach((it, i) => {
+        const card = document.createElement('div');
+        card.className = 'iter-card';
+        const pivotClass = (it.decision || '').includes('转向') ? 'pivot' : '';
+        const badge = it.decision ? (it.decision.includes('转向') ? '<span class="badge badge-pivot">转向</span>' : '<span class="badge badge-persist">坚持</span>') : '';
+        card.innerHTML = `
+          <h3>迭代 ${i + 1} ${badge}</h3>
+          <div class="iter-scope" style="margin-bottom:0.75rem;font-size:0.85rem">
+            <label style="color:var(--text-muted)">关联 Epic/Story：</label>
+            <input type="text" placeholder="如 EPIC-1, S1.1, S1.2" value="${escapeHtml(it.scope||'')}" onchange="updateIter(${i},'scope',this.value)" style="width:100%;max-width:300px;padding:0.35rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text)">
+          </div>
+          <div class="iter-grid">
+            <div class="iter-cell">
+              <h4>Build 构建</h4>
+              <textarea placeholder="MVP/Story 交付、可演示内容" onchange="updateIter(${i},'build',this.value)">${escapeHtml(it.build||'')}</textarea>
+            </div>
+            <div class="iter-cell">
+              <h4>Measure 测量</h4>
+              <textarea placeholder="指标、数据、用户反馈" onchange="updateIter(${i},'measure',this.value)">${escapeHtml(it.measure||'')}</textarea>
+            </div>
+            <div class="iter-cell">
+              <h4>Learn 学习</h4>
+              <textarea placeholder="假设验证结论、新认知" onchange="updateIter(${i},'learn',this.value)">${escapeHtml(it.learn||'')}</textarea>
+            </div>
+            <div class="iter-cell ${pivotClass}">
+              <h4>坚持/转向</h4>
+              <textarea placeholder="决策：坚持优化 or 调整方案/用户/模式" onchange="updateIter(${i},'decision',this.value)">${escapeHtml(it.decision||'')}</textarea>
+            </div>
+          </div>
+          <div class="iter-actions">
+            <button class="btn btn-sm" onclick="delIter(${i})">删除迭代</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+    function escapeHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+    function updateIter(i, k, v) {
+      data.iterations[i] = data.iterations[i] || {};
+      data.iterations[i][k] = v;
+      save();
+    }
+    function addIteration() {
+      data.iterations = data.iterations || [];
+      data.iterations.push({ build: '', measure: '', learn: '', decision: '' });
+      save();
+      render();
+    }
+    function delIter(i) {
+      data.iterations.splice(i, 1);
+      save();
+      render();
+    }
+
+    async function downloadTemplate() {
+      try {
+        const r = await fetch('templates/BML-验证看板-模板.json');
+        const t = r.ok ? await r.json() : { meta:{name:'BML 验证看板',updated:''}, iterations:[] };
+        delete t._comment;
+        const blob = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'BML-验证看板-模板.json';
+        a.click();
+      } catch (_) {
+        const t = { meta:{name:'BML 验证看板',updated:''}, iterations:[] };
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' }));
+        a.download = 'BML-验证看板-模板.json';
+        a.click();
+      }
+    }
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const d = JSON.parse(r.result);
+          if (Array.isArray(d.iterations)) data.iterations = d.iterations;
+          save();
+          render();
+          alert('导入成功，共 ' + data.iterations.length + ' 个迭代');
+        } catch (err) { alert('导入失败：' + (err.message || '无效 JSON')); }
+        e.target.value = '';
+      };
+      r.readAsText(f, 'UTF-8');
+    });
+
+    function copyPlanningScope() {
+      try {
+        const plan = JSON.parse(localStorage.getItem('dial-bam-planning') || '{}');
+        const epics = plan.epics || [];
+        const ids = [];
+        epics.forEach(e => {
+          ids.push(e.id);
+          (e.stories || []).forEach(s => ids.push(s.id));
+        });
+        if (ids.length === 0) {
+          alert('规划看板暂无数据，请先导入 BAM 或填写规划看板。');
+          return;
+        }
+        navigator.clipboard.writeText(ids.join(', ')).then(() => alert('已复制 ' + ids.length + ' 个 Epic/Story ID，可粘贴到「关联 Epic/Story」字段。'));
+      } catch (e) {
+        alert('未找到规划看板数据。');
+      }
+    }
+
+    function exportJSON() {
+      const d = { meta: { name: 'BML 验证看板', updated: new Date().toISOString().slice(0,10) }, iterations: data.iterations };
+      const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'BML-验证看板-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+    }
+    function exportText() {
+      let text = 'BML 验证看板\n' + '='.repeat(20) + '\n\n';
+      (data.iterations || []).forEach((it, i) => {
+        text += `迭代 ${i + 1}\n` + '-'.repeat(15) + '\n';
+        text += 'Build：' + (it.build || '') + '\n';
+        text += 'Measure：' + (it.measure || '') + '\n';
+        text += 'Learn：' + (it.learn || '') + '\n';
+        text += '坚持/转向：' + (it.decision || '') + '\n\n';
+      });
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'BML-验证看板-' + new Date().toISOString().slice(0,10) + '.txt';
+      a.click();
+    }
+    function copyForAI() {
+      let s = '请基于以下 BML 迭代记录，输出：1) 假设验证总结；2) 下一轮迭代建议；3) 坚持/转向的决策依据。\n\n【BML 迭代】\n';
+      (data.iterations || []).forEach((it, i) => {
+        s += `迭代${i+1}：Build ${it.build||'-'} | Measure ${it.measure||'-'} | Learn ${it.learn||'-'} | 决策 ${it.decision||'-'}\n`;
+      });
+      navigator.clipboard.writeText(s).then(() => alert('已复制到剪贴板'));
+    }
+    function clearAll() {
+      if (confirm('确定清空？')) {
+        data.iterations = [];
+        localStorage.removeItem(STORAGE_KEY);
+        render();
+      }
+    }
+
+    load();
+    render();
+  </script>
+</body>
+</html>

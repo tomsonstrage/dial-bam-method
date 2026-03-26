@@ -1,0 +1,19 @@
+{
+  "_comment": "Project Brief 输入/输出模板。填写各字段值后导入。",
+  "meta": {
+    "name": "Project Brief",
+    "updated": "YYYY-MM-DD"
+  },
+  "background": "",
+  "targetMarket": "",
+  "valueProp": "",
+  "assumptions": "",
+  "scope": "",
+  "exclusions": "",
+  "L1": [
+    {
+      "id": "L1-01",
+      "name": ""
+    }
+  ]
+}

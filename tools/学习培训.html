@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习培训 - 战略管理 · 数字化 · 业务分析 | DIAL-BAM</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent2: #3fb950;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .header h1 { font-size: 1.5rem; margin: 0; }
+    .header-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .header a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .header a:hover { text-decoration: underline; }
+    .shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .shortcut-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    .shortcut-btn:hover, .shortcut-btn.active { border-color: var(--accent); color: var(--accent); }
+    .shortcut-btn .icon { font-size: 1.1rem; }
+    .section-title {
+      font-size: 1.1rem;
+      margin: 0 0 1rem 0;
+      color: var(--text-muted);
+    }
+    .category-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .category-tab {
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .category-tab:hover { color: var(--text); border-color: var(--accent); }
+    .category-tab.active { background: rgba(88,166,255,0.15); border-color: var(--accent); color: var(--accent); }
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .course-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .course-card:hover { border-color: var(--accent); }
+    .course-card-header {
+      padding: 1.25rem;
+      cursor: pointer;
+    }
+    .course-card h3 { font-size: 1.05rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+    .course-card .summary { font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+    .course-card .meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+    .course-card .chapters {
+      padding: 0 1.25rem 1.25rem;
+      display: none;
+      border-top: 1px solid var(--border);
+    }
+    .course-card.expanded .chapters { display: block; padding-top: 1rem; }
+    .chapter-list { list-style: none; padding: 0; margin: 0; }
+    .chapter-list li { margin-bottom: 0.5rem; }
+    .chapter-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      background: var(--surface2);
+      border-radius: 6px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+    .chapter-list a:hover { background: rgba(88,166,255,0.15); }
+    .chapter-list a .done { color: var(--accent2); }
+    .path-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .path-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .path-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .path-item .role { font-weight: 600; color: var(--accent2); margin-bottom: 0.5rem; font-size: 0.95rem; }
+    .path-item .focus { font-size: 0.8rem; color: var(--text-muted); }
+    .path-item a { display: inline-block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+    .path-item a:hover { text-decoration: underline; }
+    .my-study {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .my-study h2 { font-size: 1.1rem; margin: 0 0 1rem 0; }
+    .my-study-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .my-study-stats span { font-size: 0.9rem; color: var(--text-muted); }
+    .my-study-stats strong { color: var(--accent2); }
+    .my-study-list { font-size: 0.9rem; color: var(--text-muted); }
+    .my-study-list a { color: var(--accent); text-decoration: none; }
+    .my-study-list a:hover { text-decoration: underline; }
+    .doc-link {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      margin-top: 1.5rem; padding: 0.75rem 1rem;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--accent); text-decoration: none; font-size: 0.95rem;
+    }
+    .doc-link:hover { border-color: var(--accent); }
+    .footer { margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted); }
+    .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; }
+    .search-box {
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      width: 100%;
+      max-width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    .search-box:focus { outline: none; border-color: var(--accent); }
+    .search-box::placeholder { color: var(--text-muted); }
+    .chapter-type { font-size: 0.75rem; opacity: 0.8; margin-left: 0.25rem; }
+    .progress-bar {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .progress-bar-fill { height: 100%; background: var(--accent2); transition: width 0.3s; }
+    .my-study-group { margin-bottom: 1rem; }
+    .my-study-group-title { font-size: 0.9rem; color: var(--accent); margin-bottom: 0.5rem; }
+    .role-courses { margin-top: 1rem; }
+    .role-courses .course-mini {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      background: var(--surface2);
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .role-courses .course-mini:hover { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .loading-skeleton { animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.5; } }
+    .practice-card, .exam-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .practice-card h3, .exam-card h3 { font-size: 1.05rem; margin: 0 0 0.5rem 0; color: var(--accent); }
+    .practice-step, .exam-option {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.75rem; margin-bottom: 0.5rem;
+      background: var(--surface2); border-radius: 6px;
+    }
+    .practice-step a { color: var(--accent); text-decoration: none; flex:1; }
+    .practice-step a:hover { text-decoration: underline; }
+    .practice-step.done { opacity: 0.8; }
+    .practice-step.done .step-check { color: var(--accent2); }
+    .cert-card {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .cert-card.achieved { border-color: var(--accent2); }
+    .cert-card h3 { font-size: 1.2rem; margin: 0 0 0.5rem 0; }
+    .cert-badge { font-size: 3rem; margin-bottom: 0.5rem; }
+    .cert-reqs { font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; text-align: left; }
+    .exam-question { margin-bottom: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 8px; }
+    .exam-question label { display: block; padding: 0.5rem; cursor: pointer; border-radius: 6px; }
+    .exam-question label:hover { background: var(--surface2); }
+    .exam-result { font-size: 1.2rem; font-weight: 600; margin: 1rem 0; }
+    .exam-result.pass { color: var(--accent2); }
+    .exam-result.fail { color: #f85149; }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .dashboard-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .dashboard-card .num { font-size: 1.75rem; font-weight: 700; color: var(--accent); }
+    .dashboard-card .label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .dashboard-card .bar { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 0.5rem; overflow: hidden; }
+    .dashboard-card .bar-fill { height: 100%; background: var(--accent2); }
+    .next-action { color: var(--accent); text-decoration: none; }
+    .next-action:hover { text-decoration: underline; }
+    .cert-print, .cert-export-png, .cert-badge { margin-top: 0.5rem; margin-right: 0.5rem; padding: 0.5rem 1rem; background: var(--accent); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    .cert-print:hover, .cert-export-png:hover, .cert-badge:hover { opacity: 0.9; }
+    .cert-export-png { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .cert-badge { background: var(--accent2); }
+    @media print {
+      body * { visibility: hidden; }
+      #certPrintArea, #certPrintArea * { visibility: visible; }
+      #certPrintArea { position: absolute; left: 0; top: 0; width: 100%; padding: 3rem; }
+      .shortcuts, .footer, .doc-link { display: none !important; }
+    }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .course-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>学习 · 实训 · 考试 · 认证</h1>
+      <div class="header-links">
+        <a href="文档阅读.html?doc=学习培训体系.md">📖 培训体系文档</a>
+        <a href="index.html">← 工具中心</a>
+      </div>
+    </div>
+
+    <div class="shortcuts">
+      <a href="#" class="shortcut-btn active" data-view="dashboard"><span class="icon">📊</span>总览</a>
+      <a href="#" class="shortcut-btn" data-view="courses"><span class="icon">📚</span>学习</a>
+      <a href="#" class="shortcut-btn" data-view="practice"><span class="icon">🔧</span>实训</a>
+      <a href="#" class="shortcut-btn" data-view="exam"><span class="icon">📝</span>考试</a>
+      <a href="#" class="shortcut-btn" data-view="cert"><span class="icon">🏆</span>认证</a>
+      <a href="#" class="shortcut-btn" data-view="mystudy"><span class="icon">📖</span>我的学习</a>
+      <a href="#" class="shortcut-btn" data-view="roles"><span class="icon">👤</span>按角色</a>
+    </div>
+
+    <div id="view-dashboard">
+      <div class="section-title">学习进度总览</div>
+      <div class="dashboard-grid" id="dashboardGrid"></div>
+      <div id="dashboardNext" style="font-size:0.9rem;color:var(--text-muted)"></div>
+    </div>
+
+    <div id="view-courses" style="display:none">
+      <div class="section-title">精选课程 · 系统化学习</div>
+      <input type="text" class="search-box" id="searchBox" placeholder="搜索课程标题、简介..." />
+      <div class="category-tabs" id="categoryTabs"></div>
+      <div class="course-grid" id="courseGrid"></div>
+    </div>
+
+    <div id="view-mystudy" style="display:none">
+      <div class="my-study">
+        <h2>我的学习</h2>
+        <div class="my-study-stats" id="myStudyStats"></div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="progressBarFill" style="width:0%"></div></div>
+        <div class="my-study-list" id="myStudyList"></div>
+        <button type="button" id="clearProgress" style="margin-top:0.75rem;padding:0.35rem 0.75rem;font-size:0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer">清除学习进度</button>
+        <button type="button" id="clearAllProgress" style="margin-left:0.5rem;padding:0.35rem 0.75rem;font-size:0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer">清除全部（学习+实训+考试）</button>
+      </div>
+    </div>
+
+    <div id="view-practice" style="display:none">
+      <div class="section-title">实训任务 · 动手实践</div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">使用工具完成实操任务，勾选已完成步骤</p>
+      <div id="practiceList"></div>
+    </div>
+
+    <div id="view-exam" style="display:none">
+      <div class="section-title">考试测验</div>
+      <div id="examListArea"></div>
+      <div id="examTakeArea" style="display:none">
+        <h3 id="examTitle"></h3>
+        <form id="examForm"></form>
+        <button type="button" id="examSubmit" style="margin-top:1rem;padding:0.5rem 1.5rem;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.95rem">提交答卷</button>
+      </div>
+      <div id="examResultArea" style="display:none">
+        <div class="exam-result" id="examResultText"></div>
+        <p id="examResultDetail" style="font-size:0.9rem;color:var(--text-muted)"></p>
+        <button type="button" id="examBack" style="margin-top:1rem;padding:0.5rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer">返回考试列表</button>
+      </div>
+    </div>
+
+    <div id="view-cert" style="display:none">
+      <div class="section-title">认证 · 数字护照</div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">学习 + 实训 + 考试 达标后可获得认证</p>
+      <div id="certList"></div>
+      <button type="button" id="clearAllProgressCert" style="margin-top:1rem;padding:0.35rem 0.75rem;font-size:0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer">清除全部进度（重新开始）</button>
+    </div>
+
+    <div id="view-roles" style="display:none">
+      <div class="section-title">按角色推荐学习路径</div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">选择角色查看推荐课程</p>
+      <div class="path-grid" id="pathGrid"></div>
+      <div id="roleCoursesArea" class="role-courses" style="display:none;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <h3 style="font-size:1rem;margin:0 0 0.75rem 0" id="roleCoursesTitle"></h3>
+        <div id="roleCoursesList"></div>
+      </div>
+    </div>
+
+    <div class="path-section" id="pathSection">
+      <div class="section-title">按角色推荐学习路径</div>
+      <div class="path-grid" id="pathGridInline"></div>
+    </div>
+
+    <a href="文档阅读.html?doc=学习培训体系.md" class="doc-link">
+      📖 阅读完整培训体系文档（战略管理、数字化、业务分析详解）
+    </a>
+
+    <div class="footer" style="margin-top: 1.5rem;">
+      借鉴培训平台设计 · 建议先阅读 <a href="文档阅读.html?doc=快速开始.md" style="color:var(--accent)">快速开始</a> 和 <a href="文档阅读.html?doc=00-核心理念.md" style="color:var(--accent)">核心理念</a>
+    </div>
+  </div>
+  <div id="certPrintArea" style="display:none;padding:3rem;text-align:center;background:#fff;color:#000;min-height:100vh">
+    <h1 style="font-size:2rem;margin-bottom:0.5rem">DIAL-BAM 认证证书</h1>
+    <p id="certPrintName" style="font-size:1.5rem;font-weight:600;margin:1rem 0"></p>
+    <p class="sub" style="color:#666">已完成学习、实训与考试，掌握方法论基础</p>
+    <p style="margin-top:2rem;font-size:0.9rem;color:#999">DIAL-BAM Method · 业务分析及软件开发体系</p>
+  </div>
+
+  <script>
+    const PROGRESS_KEY = 'dial-bam-study-progress';
+    const PRACTICE_KEY = 'dial-bam-practice-progress';
+    const EXAM_KEY = 'dial-bam-exam-scores';
+    let config = { categories: [], courses: [], roles: [], practices: [], exams: [], certifications: [] };
+    let currentCategory = '';
+    let searchKeyword = '';
+
+    function getProgress() {
+      try {
+        return JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+      } catch { return {}; }
+    }
+    function setProgress(obj) {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(obj));
+    }
+    function markDone(courseId, chapterIdx) {
+      const p = getProgress();
+      if (!p[courseId]) p[courseId] = [];
+      if (!p[courseId].includes(chapterIdx)) {
+        p[courseId].push(chapterIdx);
+        setProgress(p);
+      }
+    }
+    function isDone(courseId, chapterIdx) {
+      const p = getProgress();
+      return (p[courseId] || []).includes(chapterIdx);
+    }
+    function getPracticeProgress() {
+      try { return JSON.parse(localStorage.getItem(PRACTICE_KEY) || '{}'); } catch { return {}; }
+    }
+    function setPracticeProgress(obj) { localStorage.setItem(PRACTICE_KEY, JSON.stringify(obj)); }
+    function isPracticeStepDone(practiceId, stepIdx) {
+      const p = getPracticeProgress();
+      return (p[practiceId] || []).includes(stepIdx);
+    }
+    function togglePracticeStep(practiceId, stepIdx) {
+      const p = getPracticeProgress();
+      if (!p[practiceId]) p[practiceId] = [];
+      const idx = p[practiceId].indexOf(stepIdx);
+      if (idx >= 0) p[practiceId].splice(idx, 1);
+      else p[practiceId].push(stepIdx);
+      setPracticeProgress(p);
+      renderPracticeList();
+    }
+    function getExamScores() {
+      try { return JSON.parse(localStorage.getItem(EXAM_KEY) || '{}'); } catch { return {}; }
+    }
+    function setExamScore(examId, score) {
+      const s = getExamScores();
+      s[examId] = Math.max(s[examId] || 0, score);
+      localStorage.setItem(EXAM_KEY, JSON.stringify(s));
+    }
+
+    async function loadConfig() {
+      const grid = document.getElementById('courseGrid');
+      if (grid) grid.innerHTML = '<div class="empty-state loading-skeleton">加载课程中...</div>';
+      try {
+        const r = await fetch('学习培训-课程配置.json');
+        if (!r.ok) throw new Error(r.status);
+        config = await r.json();
+      } catch (e) {
+        console.error('加载课程配置失败', e);
+        if (grid) grid.innerHTML = '<div class="empty-state">加载失败，请刷新重试。确保 <code>学习培训-课程配置.json</code> 存在。</div>';
+        return;
+      }
+      render();
+      document.getElementById('searchBox')?.addEventListener('input', (e) => {
+        searchKeyword = (e.target.value || '').trim().toLowerCase();
+        renderCourseGrid();
+      });
+    }
+
+    function render() {
+      renderDashboard();
+      renderCategoryTabs();
+      renderCourseGrid();
+      renderPracticeList();
+      renderExamList();
+      renderCertList();
+      renderPathGrid();
+      renderPathGridInline();
+      renderMyStudy();
+      bindShortcuts();
+    }
+
+    function renderDashboard() {
+      const el = document.getElementById('dashboardGrid');
+      const nextEl = document.getElementById('dashboardNext');
+      if (!el) return;
+      const studyPct = getStudyPct();
+      const practiceCount = getPracticeCount();
+      const practices = config.practices || [];
+      const examScores = getExamScores();
+      const examId = (config.exams || [])[0]?.id;
+      const examScore = examId ? (examScores[examId] || 0) : 0;
+      const cert = (config.certifications || [])[0];
+      const req = cert?.requirements || {};
+      const certOk = studyPct >= (req.studyPct || 0) && practiceCount >= (req.practiceCount || 0) && examScore >= (req.examScore || 60);
+      const totalCh = (config.courses || []).reduce((n, c) => n + (c.chapters || []).length, 0);
+      const doneCh = Object.values(getProgress()).reduce((n, arr) => n + arr.length, 0);
+      el.innerHTML = `
+        <div class="dashboard-card"><div class="num">${studyPct}%</div><div class="label">学习完成度</div><div class="bar"><div class="bar-fill" style="width:${studyPct}%"></div></div></div>
+        <div class="dashboard-card"><div class="num">${doneCh}/${totalCh}</div><div class="label">已学章节</div><div class="bar"><div class="bar-fill" style="width:${totalCh ? (doneCh/totalCh)*100 : 0}%"></div></div></div>
+        <div class="dashboard-card"><div class="num">${practiceCount}/${practices.length}</div><div class="label">已完实训</div><div class="bar"><div class="bar-fill" style="width:${practices.length ? (practiceCount/practices.length)*100 : 0}%"></div></div></div>
+        <div class="dashboard-card"><div class="num">${examScore}</div><div class="label">考试最高分</div><div class="bar"><div class="bar-fill" style="width:${examScore}%"></div></div></div>
+        <div class="dashboard-card"><div class="num">${certOk ? '✓' : '—'}</div><div class="label">认证状态</div><div class="bar"><div class="bar-fill" style="width:${certOk ? 100 : 0}%"></div></div></div>
+      `;
+      const tips = [];
+      const links = [];
+      if (studyPct < (req.studyPct || 30)) { tips.push('继续学习课程'); links.push({ text: '继续学习课程', view: 'courses' }); }
+      if (practiceCount < (req.practiceCount || 1)) { tips.push('完成至少 1 个实训'); links.push({ text: '完成实训', view: 'practice' }); }
+      if (examScore < (req.examScore || 60)) { tips.push('考试达到 60 分'); links.push({ text: '去考试', view: 'exam' }); }
+      const firstLink = links[0];
+      nextEl.innerHTML = certOk ? '🎉 恭喜！你已完成认证' : (tips.length
+        ? '下一步：' + (firstLink ? `<a href="#" class="next-action" data-view="${firstLink.view}">${firstLink.text}</a>` + (tips.length > 1 ? '、' + tips.slice(1).join('、') : '') : tips.join('、'))
+        : '<a href="#" class="next-action" data-view="courses">开始学习吧</a>');
+      nextEl.querySelectorAll('.next-action').forEach(a => {
+        a.onclick = (e) => { e.preventDefault(); switchView(a.dataset.view); };
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.cert-print');
+      if (btn) {
+        const name = btn.dataset.certName || 'DIAL-BAM 认证';
+        document.getElementById('certPrintName').textContent = name;
+        document.getElementById('certPrintArea').style.display = 'block';
+        window.print();
+        document.getElementById('certPrintArea').style.display = 'none';
+      }
+      const badgeBtn = e.target.closest('.cert-badge');
+      if (badgeBtn) {
+        const name = (badgeBtn.dataset.certName || 'DIAL-BAM认证').replace(/[/\\?*:"<>|]/g, '-');
+        const c = document.createElement('canvas');
+        c.width = 160; c.height = 32;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#1a2332';
+        ctx.fillRect(0,0,160,32);
+        ctx.strokeStyle = '#58a6ff';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(1,1,158,30);
+        ctx.fillStyle = '#58a6ff';
+        ctx.font = '600 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('DIAL-BAM ' + name.slice(0,10), 80, 16);
+        const a = document.createElement('a');
+        a.href = c.toDataURL('image/png');
+        a.download = 'DIAL-BAM-badge-' + name + '.png';
+        a.click();
+      }
+      const pngBtn = e.target.closest('.cert-export-png');
+      if (pngBtn && typeof html2canvas !== 'undefined') {
+        const name = (pngBtn.dataset.certName || 'DIAL-BAM认证').replace(/[/\\?*:"<>|]/g, '-');
+        document.getElementById('certPrintName').textContent = name;
+        const area = document.getElementById('certPrintArea');
+        const prevDisplay = area.style.display;
+        area.style.display = 'block';
+        area.style.visibility = 'hidden';
+        area.style.position = 'absolute';
+        area.style.left = '0';
+        area.style.top = '0';
+        area.style.zIndex = '-1';
+        html2canvas(area, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = 'DIAL-BAM-' + name + '-' + new Date().toISOString().slice(0,10) + '.png';
+          a.click();
+          area.style.display = prevDisplay;
+          area.style.visibility = '';
+          area.style.position = '';
+          area.style.left = '';
+          area.style.top = '';
+          area.style.zIndex = '';
+        }).catch(() => { area.style.display = prevDisplay; area.style.visibility = ''; area.style.position = ''; area.style.left = ''; area.style.top = ''; area.style.zIndex = ''; alert('导出失败，请尝试打印'); });
+      }
+    });
+
+    function renderCategoryTabs() {
+      const el = document.getElementById('categoryTabs');
+      if (!el) return;
+      el.innerHTML = '';
+      const all = document.createElement('button');
+      all.className = 'category-tab active';
+      all.textContent = '全部';
+      all.dataset.category = '';
+      all.onclick = () => filterByCategory('');
+      el.appendChild(all);
+      (config.categories || []).forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'category-tab';
+        btn.textContent = cat.name;
+        btn.dataset.category = cat.id;
+        btn.onclick = () => filterByCategory(cat.id);
+        el.appendChild(btn);
+      });
+    }
+
+    function filterByCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('#categoryTabs .category-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.category === cat);
+      });
+      renderCourseGrid();
+    }
+
+    function renderCourseGrid() {
+      const el = document.getElementById('courseGrid');
+      if (!el) return;
+      let courses = config.courses || [];
+      if (currentCategory) courses = courses.filter(c => c.category === currentCategory);
+      if (searchKeyword) {
+        courses = courses.filter(c => {
+          const t = (c.title + ' ' + (c.summary || '')).toLowerCase();
+          return t.includes(searchKeyword);
+        });
+      }
+      el.innerHTML = courses.map(course => {
+        const chapters = course.chapters || [];
+        const doneCount = chapters.reduce((n, _, i) => n + (isDone(course.id, i) ? 1 : 0), 0);
+        const typeIcon = (ch) => ch.type === 'tool' ? '🔧' : '📄';
+        const chaptersHtml = chapters.map((ch, i) => {
+          const done = isDone(course.id, i);
+          return `<li><a href="${ch.url}" target="_blank" onclick="markDoneAndOpen('${course.id}',${i})">${done ? '<span class="done">✓</span>' : ''} ${ch.title}<span class="chapter-type">${typeIcon(ch)}</span></a></li>`;
+        }).join('');
+        return `
+          <div class="course-card" data-course-id="${course.id}">
+            <div class="course-card-header">
+              <h3>${course.title}</h3>
+              <p class="summary">${course.summary || ''}</p>
+              <div class="meta">${chapters.length} 节 · 已完成 ${doneCount}/${chapters.length}</div>
+            </div>
+            <div class="chapters">
+              <ul class="chapter-list">${chaptersHtml}</ul>
+            </div>
+          </div>`;
+      }).join('') || '<div class="empty-state">暂无课程</div>';
+
+      el.querySelectorAll('.course-card-header').forEach(h => {
+        h.onclick = () => {
+          const card = h.closest('.course-card');
+          card.classList.toggle('expanded');
+        };
+      });
+    }
+
+    function markDoneAndOpen(courseId, chapterIdx) {
+      markDone(courseId, chapterIdx);
+    }
+
+    const PRACTICE_LINKS = { 'practice-bam': { text: '去规划看板', url: '规划看板.html' }, 'practice-plan': { text: '去交付包导出', url: '交付包导出.html' }, 'practice-delivery': { text: '去 BAM 追溯矩阵', url: 'BAM-追溯矩阵.html' } };
+    function renderPracticeList() {
+      const el = document.getElementById('practiceList');
+      if (!el) return;
+      const practices = config.practices || [];
+      el.innerHTML = practices.map(p => {
+        const steps = p.steps || [];
+        const doneCount = steps.reduce((n, _, i) => n + (isPracticeStepDone(p.id, i) ? 1 : 0), 0);
+        const allDone = steps.length > 0 && doneCount >= steps.length;
+        const link = allDone && PRACTICE_LINKS[p.id] ? `<p style="margin-top:0.75rem"><a href="${PRACTICE_LINKS[p.id].url}" target="_blank" style="color:var(--accent);font-size:0.9rem">→ ${PRACTICE_LINKS[p.id].text}</a></p>` : '';
+        const stepsHtml = steps.map((s, i) => {
+          const done = isPracticeStepDone(p.id, i);
+          return `<div class="practice-step ${done ? 'done' : ''}">
+            <span class="step-check">${done ? '✓' : '○'}</span>
+            <a href="${s.url}" target="_blank">${s.title}</a>
+            <button type="button" onclick="togglePracticeStep('${p.id}',${i})" style="padding:0.2rem 0.5rem;font-size:0.75rem;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);cursor:pointer">${done ? '取消' : '完成'}</button>
+          </div>`;
+        }).join('');
+        return `<div class="practice-card"><h3>${p.title}</h3><p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 1rem 0">${p.desc || ''}</p><div class="meta" style="margin-bottom:0.75rem">${doneCount}/${steps.length} 步已完成</div>${stepsHtml}${link}</div>`;
+      }).join('') || '<div class="empty-state">暂无实训任务</div>';
+    }
+
+    function renderExamList() {
+      const el = document.getElementById('examListArea');
+      if (!el) return;
+      const exams = config.exams || [];
+      const scores = getExamScores();
+      el.innerHTML = exams.map(e => {
+        const best = scores[e.id];
+        const pass = e.passScore && best >= e.passScore;
+        return `<div class="exam-card"><h3>${e.title}</h3><p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 0.75rem 0">${e.desc || ''}</p><p style="font-size:0.9rem">${best !== undefined ? `最高分：${best}${pass ? ' ✓ 已通过' : ''}` : '未考'}</p><button type="button" onclick="startExam('${e.id}')" style="margin-top:0.5rem;padding:0.4rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem">${best !== undefined ? '重新考试' : '开始考试'}</button></div>`;
+      }).join('') || '<div class="empty-state">暂无考试</div>';
+    }
+
+    function startExam(examId) {
+      const exam = (config.exams || []).find(e => e.id === examId);
+      if (!exam) return;
+      document.getElementById('examListArea').style.display = 'none';
+      document.getElementById('examTakeArea').style.display = 'block';
+      document.getElementById('examResultArea').style.display = 'none';
+      document.getElementById('examTitle').textContent = exam.title;
+      const form = document.getElementById('examForm');
+      form.innerHTML = (exam.questions || []).map((q, qi) => {
+        const opts = (q.options || []).map((o, oi) =>
+          `<label><input type="radio" name="q${qi}" value="${oi}" /> ${o.text}</label>`
+        ).join('');
+        return `<div class="exam-question"><p><strong>${qi + 1}. ${q.q}</strong></p>${opts}</div>`;
+      }).join('');
+      window._currentExamId = examId;
+    }
+
+    function submitExam() {
+      const examId = window._currentExamId;
+      const exam = (config.exams || []).find(e => e.id === examId);
+      if (!exam) return;
+      const form = document.getElementById('examForm');
+      const questions = exam.questions || [];
+      let correct = 0;
+      questions.forEach((q, qi) => {
+        const sel = form.querySelector(`input[name="q${qi}"]:checked`);
+        const optIdx = sel ? parseInt(sel.value, 10) : -1;
+        const opt = (q.options || [])[optIdx];
+        if (opt && opt.correct) correct++;
+      });
+      const score = questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0;
+      setExamScore(examId, score);
+      document.getElementById('examTakeArea').style.display = 'none';
+      document.getElementById('examResultArea').style.display = 'block';
+      const resultEl = document.getElementById('examResultText');
+      resultEl.textContent = `得分：${score} 分${score >= (exam.passScore || 60) ? ' · 通过' : ' · 未通过'}`;
+      resultEl.className = 'exam-result ' + (score >= (exam.passScore || 60) ? 'pass' : 'fail');
+      document.getElementById('examResultDetail').textContent = `答对 ${correct}/${questions.length} 题`;
+    }
+
+    document.getElementById('examSubmit')?.addEventListener('click', submitExam);
+    document.getElementById('examBack')?.addEventListener('click', () => {
+      document.getElementById('examListArea').style.display = 'block';
+      document.getElementById('examTakeArea').style.display = 'none';
+      document.getElementById('examResultArea').style.display = 'none';
+      renderExamList();
+    });
+
+    function renderCertList() {
+      const el = document.getElementById('certList');
+      if (!el) return;
+      const certs = config.certifications || [];
+      const studyPct = getStudyPct();
+      const practiceCount = getPracticeCount();
+      const examScores = getExamScores();
+      const examId = (config.exams || [])[0]?.id;
+      const myScore = examId ? (examScores[examId] || 0) : 0;
+      el.innerHTML = certs.map(c => {
+        const req = c.requirements || {};
+        const needStudy = (req.studyPct || 0);
+        const needPractice = (req.practiceCount || 0);
+        const needScore = (req.examScore || 60);
+        const studyOk = studyPct >= needStudy;
+        const practiceOk = practiceCount >= needPractice;
+        const examOk = myScore >= needScore;
+        const achieved = studyOk && practiceOk && examOk;
+        return `<div class="cert-card ${achieved ? 'achieved' : ''}">
+          <div class="cert-badge">${achieved ? '🏆' : '📜'}</div>
+          <h3>${c.name}</h3>
+          <p style="font-size:0.9rem;color:var(--text-muted)">${c.desc || ''}</p>
+          ${achieved ? '<p style="color:var(--accent2);font-weight:600;margin-top:0.5rem">✓ 已获得</p><button type="button" class="cert-print" data-cert-id="' + c.id + '" data-cert-name="' + (c.name || '').replace(/"/g, '&quot;') + '">🖨 打印</button><button type="button" class="cert-export-png" data-cert-id="' + c.id + '" data-cert-name="' + (c.name || '').replace(/"/g, '&quot;') + '">📥 证书 PNG</button><button type="button" class="cert-badge" data-cert-name="' + (c.name || '').replace(/"/g, '&quot;') + '">🏅 徽章</button>' : ''}
+          <div class="cert-reqs">
+            <div>学习完成度 ${studyPct}% ${studyOk ? '✓' : ''}（需≥${needStudy}%）</div>
+            <div>实训完成 ${practiceCount} 个 ${practiceOk ? '✓' : ''}（需≥${needPractice}）</div>
+            <div>考试得分 ${myScore} ${examOk ? '✓' : ''}（需≥${needScore}）</div>
+          </div>
+        </div>`;
+      }).join('') || '<div class="empty-state">暂无认证</div>';
+    }
+
+    function getStudyPct() {
+      const total = (config.courses || []).reduce((n, c) => n + (c.chapters || []).length, 0);
+      const done = Object.values(getProgress()).reduce((n, arr) => n + arr.length, 0);
+      return total > 0 ? Math.round((done / total) * 100) : 0;
+    }
+    function getPracticeCount() {
+      const p = getPracticeProgress();
+      return Object.keys(p).filter(k => (p[k] || []).length === ((config.practices || []).find(x => x.id === k)?.steps || []).length).length;
+    }
+
+    function renderPathGrid() {
+      const el = document.getElementById('pathGrid');
+      if (!el) return;
+      el.innerHTML = (config.roles || []).map(r => `
+        <div class="path-item" data-role-id="${r.id}" style="cursor:pointer">
+          <div class="role">${r.name}</div>
+          <div class="focus">${r.focus || ''}</div>
+          <span style="font-size:0.8rem;color:var(--accent)">查看推荐课程 →</span>
+        </div>
+      `).join('');
+      el.querySelectorAll('.path-item').forEach(item => {
+        item.onclick = () => showRoleCourses(item.dataset.roleId);
+      });
+    }
+
+    function showRoleCourses(roleId) {
+      const role = (config.roles || []).find(r => r.id === roleId);
+      const area = document.getElementById('roleCoursesArea');
+      const titleEl = document.getElementById('roleCoursesTitle');
+      const listEl = document.getElementById('roleCoursesList');
+      if (!role || !area || !titleEl || !listEl) return;
+      const courseIds = role.courses || [];
+      const courses = (config.courses || []).filter(c => courseIds.includes(c.id));
+      titleEl.textContent = role.name + ' · 推荐课程';
+      listEl.innerHTML = courses.map(c => {
+        const chs = c.chapters || [];
+        const done = chs.reduce((n, _, i) => n + (isDone(c.id, i) ? 1 : 0), 0);
+        return `<a href="#" class="course-mini" data-course-id="${c.id}" onclick="expandCourseCard('${c.id}');return false">${c.title}（${done}/${chs.length}）</a>`;
+      }).join('') || '<p class="empty-state">暂无推荐课程</p>';
+      area.style.display = 'block';
+    }
+
+    function expandCourseCard(courseId) {
+      currentCategory = '';
+      searchKeyword = '';
+      const sb = document.getElementById('searchBox');
+      if (sb) sb.value = '';
+      document.querySelectorAll('#categoryTabs .category-tab').forEach(t => t.classList.toggle('active', t.dataset.category === ''));
+      document.querySelectorAll('.shortcut-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-view="courses"]')?.classList.add('active');
+      document.getElementById('view-courses').style.display = 'block';
+      document.getElementById('view-mystudy').style.display = 'none';
+      document.getElementById('view-roles').style.display = 'none';
+      document.getElementById('pathSection').style.display = 'block';
+      document.querySelector('.doc-link').style.display = 'inline-flex';
+      renderCourseGrid();
+      setTimeout(() => {
+        const card = document.querySelector(`.course-card[data-course-id="${courseId}"]`);
+        if (card) {
+          card.classList.add('expanded');
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 50);
+    }
+
+    function renderPathGridInline() {
+      const el = document.getElementById('pathGridInline');
+      if (!el) return;
+      el.innerHTML = (config.roles || []).map(r => `
+        <div class="path-item">
+          <div class="role">${r.name}</div>
+          <div class="focus">${r.focus || ''}</div>
+          <a href="文档阅读.html?doc=学习培训体系.md">查看详情 →</a>
+        </div>
+      `).join('');
+    }
+
+    function renderMyStudy() {
+      const statsEl = document.getElementById('myStudyStats');
+      const listEl = document.getElementById('myStudyList');
+      const barEl = document.getElementById('progressBarFill');
+      if (!statsEl || !listEl) return;
+      const p = getProgress();
+      const totalChapters = (config.courses || []).reduce((n, c) => n + (c.chapters || []).length, 0);
+      const doneChapters = Object.values(p).reduce((n, arr) => n + arr.length, 0);
+      const pct = totalChapters > 0 ? Math.round((doneChapters / totalChapters) * 100) : 0;
+      statsEl.innerHTML = `<span>已学习 <strong>${doneChapters}</strong> 节</span><span>共 <strong>${totalChapters}</strong> 节</span><span>完成度 <strong>${pct}%</strong></span>`;
+      if (barEl) barEl.style.width = pct + '%';
+      const byCourse = {};
+      (config.courses || []).forEach(c => {
+        (c.chapters || []).forEach((ch, i) => {
+          if (isDone(c.id, i)) {
+            if (!byCourse[c.title]) byCourse[c.title] = [];
+            byCourse[c.title].push({ ch, url: ch.url });
+          }
+        });
+      });
+      listEl.innerHTML = Object.keys(byCourse).length ? Object.entries(byCourse).map(([title, items]) =>
+        `<div class="my-study-group"><div class="my-study-group-title">${title}</div>${items.map(x => `<div><a href="${x.url}" target="_blank">${x.ch.title}</a></div>`).join('')}</div>`
+      ).join('') : '<div class="empty-state">暂无学习记录，去课程列表开始学习吧</div>';
+    }
+
+    document.getElementById('clearProgress')?.addEventListener('click', () => {
+      if (confirm('确定清除学习进度？')) { setProgress({}); renderMyStudy(); }
+    });
+    function clearAllProgress() {
+      setProgress({}); setPracticeProgress({}); localStorage.removeItem(EXAM_KEY);
+      renderMyStudy(); renderPracticeList(); renderExamList(); renderCertList();
+    }
+    document.getElementById('clearAllProgress')?.addEventListener('click', () => {
+      if (confirm('确定清除全部进度（学习+实训+考试）？此操作不可恢复。')) clearAllProgress();
+    });
+    document.getElementById('clearAllProgressCert')?.addEventListener('click', () => {
+      if (confirm('确定清除全部进度？将重新开始学习、实训与考试。')) clearAllProgress();
+    });
+
+    function switchView(v) {
+      const views = ['dashboard','courses','practice','exam','cert','mystudy','roles'];
+      document.querySelectorAll('.shortcut-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === v);
+      });
+      views.forEach(id => {
+        const el = document.getElementById('view-' + id);
+        if (el) el.style.display = (id === v) ? 'block' : 'none';
+      });
+      const pathSection = document.getElementById('pathSection');
+      if (pathSection) pathSection.style.display = (v === 'courses') ? 'block' : 'none';
+      const docLink = document.querySelector('.doc-link');
+      if (docLink) docLink.style.display = (v === 'roles') ? 'none' : 'inline-flex';
+      if (v === 'mystudy') renderMyStudy();
+      if (v === 'cert') renderCertList();
+      if (v === 'dashboard') renderDashboard();
+    }
+    function bindShortcuts() {
+      document.querySelectorAll('.shortcut-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          switchView(btn.dataset.view);
+        };
+      });
+    }
+
+    loadConfig();
+  </script>
+</body>
+</html>

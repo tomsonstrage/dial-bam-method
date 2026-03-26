@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>业务流可视化 - DIAL-BAM Method</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .tab {
+      padding: 0.6rem 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+    .diagram .mermaid { display: flex; justify-content: center; min-height: 300px; }
+    .legend {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface2);
+      border-radius: 6px;
+    }
+    .legend h4 { margin: 0 0 0.5rem 0; color: var(--text); }
+    .legend ul { margin: 0.5rem 0 0 1.2rem; padding: 0; }
+    .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .nav-links { margin-top: 1rem; }
+    .nav-links a { color: var(--accent); text-decoration: none; margin-right: 1rem; }
+    .nav-links a:hover { text-decoration: underline; }
+    .quick-tools {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .quick-tools h4 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--accent); }
+    .quick-tools a { color: var(--accent); text-decoration: none; margin-right: 1rem; }
+    .quick-tools a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>业务流可视化</h1>
+  <p class="meta">DIAL-BAM 全链路业务流、工具数据流、企业诊断流程 <a href="index.html" style="color:var(--accent);margin-left:1rem">← 工具中心</a></p>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="bizflow">业务流总览</button>
+    <button class="tab" data-tab="toolflow">工具与数据流</button>
+    <button class="tab" data-tab="consulting">企业诊断流程</button>
+    <button class="tab" data-tab="bam">BAM 追溯链</button>
+    <button class="tab" data-tab="deliverables">交付件流</button>
+  </div>
+
+  <!-- 业务流总览 -->
+  <div id="panel-bizflow" class="panel active">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TB
+    subgraph 理念["核心理念：战略导向 · 流程分层 · 端到端追溯 · 闭环管理"]
+        P[参考华为]
+    end
+
+    subgraph 业务方向["业务方向"]
+        B1[洞察] --> B2[战略规划] --> B3[业务分解] --> B4[差距与路径] --> B5[任务与实施]
+    end
+
+    subgraph DIAL["DIAL 阶段"]
+        D[Discovery] --> I[Insight] --> A[Architecture] --> L[Launch]
+    end
+
+    subgraph 产出["产出"]
+        O1[L1/Project Brief]
+        O2[L2/PRD/MVP]
+        O3[Epic/Story/路线图]
+        O4[Task/BML]
+    end
+
+    理念 --> 业务方向
+    业务方向 --> DIAL
+    D --> O1
+    I --> O2
+    A --> O3
+    L --> O4
+  </div>
+    </div>
+    <div class="legend">
+      <h4>业务流总览</h4>
+      核心理念 → 业务方向（洞察→战略→分解→路径→实施）→ DIAL 四阶段 → 各阶段产出
+      <div class="quick-tools">
+        <h4>快捷工具</h4>
+        <a href="洞察可视化.html">洞察</a> · <a href="痛点画布.html">痛点</a> · <a href="Project-Brief.html">Project Brief</a> · <a href="商业模式画布.html">BMC</a> · <a href="PRD-模板.html">PRD</a> · <a href="BAM-追溯矩阵.html">BAM</a> · <a href="规划看板.html">规划</a> · <a href="BML-验证看板.html">BML</a> · <a href="交付包导出.html">交付包</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 工具与数据流 -->
+  <div id="panel-toolflow" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart LR
+    subgraph Discovery["Discovery"]
+        T1[洞察可视化]
+        T2[痛点画布]
+        T2b[Project Brief]
+    end
+
+    subgraph Insight["Insight"]
+        T3[商业模式画布]
+        T3b[PRD 模板]
+    end
+
+    subgraph Arch["Architecture"]
+        T4[BAM 追溯矩阵]
+        T5[规划看板]
+    end
+
+    subgraph Launch["Launch"]
+        T6[BML 验证看板]
+    end
+
+    subgraph 交付["交付"]
+        T7[交付包导出]
+    end
+
+    T1 -->|洞察结论| T2
+    T2 -->|痛频量价| T2b
+    T2 -->|生成 BAM 初稿| T4
+    T2b -.->|L1| T4
+    T4 -.->|导入 L1| T2b
+    T4 -.->|导入 L2| T3b
+    T3 -->|L2 输入| T4
+    T4 -->|导入 Epic/Story| T5
+    T5 -->|执行| T6
+    T6 -.->|坚持/转向| T2
+    T4 -.->|汇总| T7
+    T5 -.-> T7
+    T6 -.-> T7
+  </div>
+    </div>
+    <div class="legend">
+      <h4>工具与数据流</h4>
+      <ul>
+        <li>洞察可视化 → 痛点画布（洞察结论输入）</li>
+        <li>痛点画布 → Project Brief（痛频量价）、BAM（生成初稿）</li>
+        <li>BAM ↔ Project Brief（L1 互导）、BAM → PRD（导入 L2）</li>
+        <li>商业模式画布 → BAM（L2 输入）</li>
+        <li>BAM → 规划看板（导入 Epic/Story）</li>
+        <li>BML 验证 → 坚持/转向可反馈至痛点重新验证</li>
+        <li>交付包导出：汇总各工具数据，含完整性检查</li>
+      </ul>
+      <div class="quick-tools">
+        <h4>快捷工具</h4>
+        <a href="洞察可视化.html">洞察</a> · <a href="痛点画布.html">痛点</a> · <a href="Project-Brief.html">Project Brief</a> · <a href="商业模式画布.html">BMC</a> · <a href="PRD-模板.html">PRD</a> · <a href="BAM-追溯矩阵.html">BAM</a> · <a href="规划看板.html">规划</a> · <a href="BML-验证看板.html">BML</a> · <a href="交付包导出.html">交付包</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 企业诊断流程 -->
+  <div id="panel-consulting" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TB
+    subgraph 入场["入场与诊断"]
+        E1[访谈高管/业务/员工]
+        E2[五维洞察工作坊]
+        E3[痛点收集]
+        E1 --> E2 --> E3
+    end
+
+    subgraph DIAL["DIAL 四阶段"]
+        D[Discovery 洞察可视化+痛点画布]
+        I[Insight 商业模式+差距分析]
+        A[Architecture BAM+规划看板]
+        L[Launch 任务+BML]
+        D --> I --> A --> L
+    end
+
+    subgraph 交付物["顾问交付物"]
+        O1[诊断报告]
+        O2[战略规划要点]
+        O3[短中长期路线图]
+        O4[BAM 追溯矩阵]
+        O5[BML 验证记录]
+    end
+
+    入场 --> DIAL
+    D --> O1
+    I --> O2
+    A --> O3
+    A --> O4
+    L --> O5
+  </div>
+    </div>
+    <div class="legend">
+      <h4>企业诊断与优化流程</h4>
+      <ul>
+        <li>入场：访谈 + 五维洞察工作坊 + 痛点收集</li>
+        <li>Discovery：洞察可视化、痛点画布 → L1、Project Brief</li>
+        <li>Insight：商业模式画布、差距分析 → L2、PRD、MVP</li>
+        <li>Architecture：BAM、规划看板 → 短中长期路线图</li>
+        <li>Launch：任务拆解、BML、坚持/转向</li>
+        <li>顾问交付物：诊断报告、战略要点、路线图、BAM、BML 记录</li>
+      </ul>
+      <div class="quick-tools">
+        <h4>工作坊工具</h4>
+        <a href="洞察可视化.html">洞察工作坊</a> · <a href="痛点画布.html">痛点工作坊</a> · <a href="商业模式画布.html">BMC 工作坊</a> · <a href="BAM-追溯矩阵.html">BAM 差距分析</a> · <a href="规划看板.html">路线图</a> · <a href="BML-验证看板.html">BML 验证</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAM 追溯链 -->
+  <div id="panel-bam" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart LR
+    REQ[REQ 需求]
+    L1[L1 一级域]
+    L2[L2 二级模块]
+    Epic[Epic]
+    Story[Story]
+    L3[L3 业务动作]
+    L4[L4 业务步骤/AC]
+
+    REQ --> L1 --> L2
+    L2 <--> Epic
+    Epic <--> Story
+    Story --> L3 --> L4
+  </div>
+    </div>
+    <div class="legend">
+      <h4>BAM 追溯链</h4>
+      REQ（需求）→ L1（一级业务域）→ L2（二级模块）↔ Epic ↔ Story ↔ L3（业务动作）→ L4（业务步骤/验收标准）。改一处可追溯影响范围。
+      <div class="quick-tools">
+        <h4>快捷工具</h4>
+        <a href="BAM-追溯矩阵.html">BAM 追溯矩阵</a> · <a href="规划看板.html">规划看板</a> · <a href="BAM-导入指南.md">BAM 导入指南</a> · <a href="文档阅读.html?doc=交付件清单.md">交付件清单</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 交付件流 -->
+  <div id="panel-deliverables" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TB
+    subgraph Discovery产出["Discovery 产出"]
+        D1[洞察报告]
+        D2[需求假设清单]
+        D3[L1 一级业务域]
+        D4[Project Brief]
+    end
+
+    subgraph Insight产出["Insight 产出"]
+        I1[商业模式画布]
+        I2[L2 二级模块]
+        I3[PRD]
+        I4[用户旅程]
+    end
+
+    subgraph Arch产出["Architecture 产出"]
+        A1[BAM 追溯矩阵]
+        A2[Epic/Story]
+        A3[短中长期路线图]
+    end
+
+    subgraph Launch产出["Launch 产出"]
+        L1[Task 列表]
+        L2[BML 验证记录]
+        L3[交付物]
+    end
+
+    Discovery产出 --> Insight产出 --> Arch产出 --> Launch产出
+  </div>
+    </div>
+    <div class="legend">
+      <h4>交付件流</h4>
+      <ul>
+        <li>Discovery：洞察报告、需求假设、L1、Project Brief</li>
+        <li>Insight：商业模式、L2、PRD、用户旅程</li>
+        <li>Architecture：BAM 矩阵、Epic/Story、路线图</li>
+        <li>Launch：Task、BML 记录、代码/部署</li>
+      </ul>
+      <div class="quick-tools">
+        <h4>快捷工具</h4>
+        <a href="交付包导出.html">交付包导出</a>（含完整性检查、选择性导入）
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-links">
+    <a href="DIAL-流程可视化.html">DIAL 流程可视化</a>
+    <a href="交付包导出.html">交付包导出</a>
+    <a href="../docs/业务流与优化指南.md">业务流与优化指南</a>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#1a2332',
+        primaryTextColor: '#e6edf3',
+        primaryBorderColor: '#30363d',
+        lineColor: '#58a6ff',
+        secondaryColor: '#243044',
+        tertiaryColor: '#0f1419'
+      }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((el) => {
+      mermaid.run({ nodes: [el], suppressErrors: true }).catch(() => {});
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

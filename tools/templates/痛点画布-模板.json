@@ -1,0 +1,19 @@
+{
+  "_comment": "痛点画布 输入/输出模板。填写各字段值后导入。",
+  "meta": {
+    "name": "痛点画布",
+    "updated": "YYYY-MM-DD"
+  },
+  "pain": "",
+  "freq": "",
+  "vol": "",
+  "price": "",
+  "hypotheses": [
+    {
+      "id": "H1",
+      "hyp": "",
+      "verify": "",
+      "status": "pending"
+    }
+  ]
+}

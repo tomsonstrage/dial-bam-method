@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>业务分析及软件开发体系 - 工具中心</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+      position: relative;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .system-diagram {
+      margin-bottom: 2rem;
+      padding: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .system-diagram svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 420px;
+    }
+    .flow-hint {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .flow-hint strong { color: var(--accent); }
+    .role-guide {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .role-guide h3 { font-size: 1rem; margin: 0 0 0.75rem 0; color: var(--accent); }
+    .role-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .role-btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .role-btn:hover { border-color: var(--accent); }
+    .workflow-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      padding: 0.5rem 0;
+    }
+    .workflow-bar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .workflow-bar a:hover { color: var(--accent); background: var(--surface2); }
+    .workflow-bar .sep { color: var(--border); }
+    h1 { font-size: 1.75rem; margin: 0 0 0.5rem 0; }
+    .subtitle { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.2s;
+    }
+    .tool-card:hover {
+      border-color: var(--accent);
+    }
+    .tool-card h3 {
+      font-size: 1.1rem;
+      margin: 0 0 0.5rem 0;
+      color: var(--accent);
+    }
+    .tool-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .tool-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      background: var(--surface2);
+      border-radius: 4px;
+      margin-top: 0.75rem;
+      color: var(--text-muted);
+    }
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      z-index: 999;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+    }
+    .skip-link:focus { left: 0.5rem; top: 0.5rem; }
+    .tool-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .tools { grid-template-columns: 1fr; }
+      .role-btn { min-height: 44px; display: inline-flex; align-items: center; }
+      .system-diagram { padding: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .system-diagram svg { min-width: 600px; }
+      .tool-card { padding: 1rem; }
+    }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.25rem; }
+    .flow-hint { font-size: 0.85rem; }
+  }
+    .docs {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .docs h2 { font-size: 1.1rem; margin: 0 0 1rem 0; }
+    .docs ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .docs li { margin-bottom: 0.5rem; }
+    .docs a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .docs a:hover { text-decoration: underline; }
+    .docs a[href$=".md"] { opacity: 0.9; }
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">跳转到主内容</a>
+  <div class="container" id="main">
+    <h1>业务分析及软件开发体系</h1>
+    <p class="subtitle">核心理念 → 方法论 → 工具 — 工具中心</p>
+
+    <nav class="workflow-bar" aria-label="DIAL 工作流">
+      <span>工作流：</span>
+      <a href="洞察可视化.html">洞察</a><span class="sep">→</span>
+      <a href="痛点画布.html">痛点</a><span class="sep">→</span>
+      <a href="Project-Brief.html">Brief</a><span class="sep">→</span>
+      <a href="商业模式画布.html">BMC</a><span class="sep">→</span>
+      <a href="PRD-模板.html">PRD</a><span class="sep">→</span>
+      <a href="BAM-追溯矩阵.html">BAM</a><span class="sep">→</span>
+      <a href="规划看板.html">规划</a><span class="sep">→</span>
+      <a href="BML-验证看板.html">BML</a><span class="sep">→</span>
+      <a href="交付包导出.html">交付包</a>
+    </nav>
+
+    <h2 style="font-size:1.1rem; margin:0 0 0.75rem 0; color:#8b949e">体系总览</h2>
+    <div class="system-diagram">
+      <svg viewBox="0 0 880 420" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif" font-size="12">
+        <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#58a6ff"/></marker></defs>
+        <!-- 核心理念层 -->
+        <rect x="20" y="10" width="840" height="50" rx="6" fill="#1a2332" stroke="#30363d"/>
+        <text x="440" y="32" text-anchor="middle" fill="#58a6ff" font-weight="bold">核心理念</text>
+        <text x="440" y="48" text-anchor="middle" fill="#8b949e" font-size="11">战略导向 · 流程分层 · 端到端追溯 · 闭环管理（参考华为）</text>
+
+        <!-- 业务方向流程 -->
+        <rect x="20" y="75" width="840" height="120" rx="6" fill="#0f1419" stroke="#30363d"/>
+        <text x="440" y="95" text-anchor="middle" fill="#58a6ff" font-weight="bold">业务方向（下一步做什么）</text>
+        <!-- 5个阶段框 -->
+        <g id="flow">
+          <rect x="40" y="110" width="140" height="70" rx="4" fill="#1a2332" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="110" y="135" text-anchor="middle" fill="#e6edf3" font-weight="bold">洞察</text>
+          <text x="110" y="152" text-anchor="middle" fill="#8b949e" font-size="10">五维分析</text>
+          <text x="110" y="168" text-anchor="middle" fill="#8b949e" font-size="10">L1</text>
+          <line x1="180" y1="145" x2="210" y2="145" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+          <rect x="210" y="110" width="140" height="70" rx="4" fill="#1a2332" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="280" y="135" text-anchor="middle" fill="#e6edf3" font-weight="bold">战略规划</text>
+          <text x="280" y="152" text-anchor="middle" fill="#8b949e" font-size="10">目标/MVP</text>
+          <text x="280" y="168" text-anchor="middle" fill="#8b949e" font-size="10">L2</text>
+          <line x1="350" y1="145" x2="380" y2="145" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+          <rect x="380" y="110" width="140" height="70" rx="4" fill="#1a2332" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="450" y="135" text-anchor="middle" fill="#e6edf3" font-weight="bold">业务分解</text>
+          <text x="450" y="152" text-anchor="middle" fill="#8b949e" font-size="10">L3/L4/Epic/Story</text>
+          <text x="450" y="168" text-anchor="middle" fill="#8b949e" font-size="10">追溯链</text>
+          <line x1="520" y1="145" x2="550" y2="145" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+          <rect x="550" y="110" width="140" height="70" rx="4" fill="#1a2332" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="620" y="135" text-anchor="middle" fill="#e6edf3" font-weight="bold">差距与路径</text>
+          <text x="620" y="152" text-anchor="middle" fill="#8b949e" font-size="10">现状vs目标</text>
+          <text x="620" y="168" text-anchor="middle" fill="#8b949e" font-size="10">路线图</text>
+          <line x1="690" y1="145" x2="720" y2="145" stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+          <rect x="720" y="110" width="120" height="70" rx="4" fill="#1a2332" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="780" y="135" text-anchor="middle" fill="#e6edf3" font-weight="bold">任务与实施</text>
+          <text x="780" y="152" text-anchor="middle" fill="#8b949e" font-size="10">Task/BML</text>
+          <text x="780" y="168" text-anchor="middle" fill="#8b949e" font-size="10">Launch</text>
+        </g>
+
+        <!-- DIAL 阶段标注 -->
+        <text x="110" y="200" text-anchor="middle" fill="#8b949e" font-size="10">Discovery</text>
+        <text x="280" y="200" text-anchor="middle" fill="#8b949e" font-size="10">Insight</text>
+        <text x="450" y="200" text-anchor="middle" fill="#8b949e" font-size="10">Architecture</text>
+        <text x="620" y="200" text-anchor="middle" fill="#8b949e" font-size="10">Architecture</text>
+        <text x="780" y="200" text-anchor="middle" fill="#8b949e" font-size="10">Launch</text>
+
+        <!-- 工具层 -->
+        <rect x="20" y="215" width="840" height="95" rx="6" fill="#0f1419" stroke="#30363d"/>
+        <text x="440" y="235" text-anchor="middle" fill="#58a6ff" font-weight="bold">工具</text>
+        <rect x="80" y="250" width="180" height="50" rx="4" fill="#1a2332" stroke="#30363d"/>
+        <text x="170" y="272" text-anchor="middle" fill="#e6edf3">洞察可视化</text>
+        <text x="170" y="288" text-anchor="middle" fill="#8b949e" font-size="10">PESTEL/五力/SWOT</text>
+        <rect x="290" y="250" width="180" height="50" rx="4" fill="#1a2332" stroke="#30363d"/>
+        <text x="380" y="272" text-anchor="middle" fill="#e6edf3">BAM 追溯矩阵</text>
+        <text x="380" y="288" text-anchor="middle" fill="#8b949e" font-size="10">REQ↔L1↔L2↔Epic↔Story</text>
+        <rect x="500" y="250" width="180" height="50" rx="4" fill="#1a2332" stroke="#30363d"/>
+        <text x="590" y="272" text-anchor="middle" fill="#e6edf3">DIAL 流程可视化</text>
+        <text x="590" y="288" text-anchor="middle" fill="#8b949e" font-size="10">四阶段流程图</text>
+        <rect x="710" y="250" width="120" height="50" rx="4" fill="#1a2332" stroke="#30363d"/>
+        <text x="770" y="272" text-anchor="middle" fill="#e6edf3">文档与模板</text>
+        <text x="770" y="288" text-anchor="middle" fill="#8b949e" font-size="10">00-06、检查清单</text>
+
+        <!-- 文档层 -->
+        <rect x="20" y="325" width="840" height="85" rx="6" fill="#0f1419" stroke="#30363d"/>
+        <text x="440" y="345" text-anchor="middle" fill="#58a6ff" font-weight="bold">文档体系</text>
+        <text x="150" y="368" text-anchor="middle" fill="#e6edf3" font-size="11">00 核心理念</text>
+        <text x="150" y="382" text-anchor="middle" fill="#8b949e" font-size="10">底层逻辑</text>
+        <text x="310" y="368" text-anchor="middle" fill="#e6edf3" font-size="11">01 方法论</text>
+        <text x="310" y="382" text-anchor="middle" fill="#8b949e" font-size="10">统一流程</text>
+        <text x="440" y="368" text-anchor="middle" fill="#e6edf3" font-size="11">02-05 阶段</text>
+        <text x="440" y="382" text-anchor="middle" fill="#8b949e" font-size="10">Discovery→Launch</text>
+        <text x="570" y="368" text-anchor="middle" fill="#e6edf3" font-size="11">工具应用</text>
+        <text x="570" y="382" text-anchor="middle" fill="#8b949e" font-size="10">工具↔思维</text>
+        <text x="730" y="368" text-anchor="middle" fill="#e6edf3" font-size="11">参考框架/指导文档</text>
+        <text x="730" y="382" text-anchor="middle" fill="#8b949e" font-size="10">华为、TOGAF 等</text>
+      </svg>
+    </div>
+
+    <div id="newbieBanner" class="flow-hint" style="display:none;border-left:4px solid var(--accent)">
+      <strong>首次使用？</strong> 5 分钟快速路径：<a href="洞察可视化.html">洞察</a> → <a href="痛点画布.html">痛点</a> → <a href="BAM-追溯矩阵.html">BAM</a>，或阅读 <a href="文档阅读.html?doc=快速开始.md">快速开始</a>
+      <button class="btn-close" onclick="closeNewbieBanner()" style="float:right;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem">×</button>
+    </div>
+    <div class="flow-hint">
+      <strong>数据流：</strong>洞察 → 痛点画布 → Project Brief → 商业模式画布 → PRD → BAM 追溯矩阵 → 规划看板 → BML 验证
+      <br><a href="业务流可视化.html" style="color:var(--accent);margin-top:0.5rem;display:inline-block">查看完整业务流、企业诊断流程 →</a>
+    </div>
+    <div class="role-guide">
+      <h3>按角色进入</h3>
+      <div class="role-btns">
+        <a href="洞察可视化.html" class="role-btn">战略/高管 → 洞察</a>
+        <a href="痛点画布.html" class="role-btn">产品经理 → 痛点</a>
+        <a href="BAM-追溯矩阵.html" class="role-btn">业务架构师 → BAM</a>
+        <a href="业务流可视化.html" class="role-btn">企业顾问 → 诊断流程</a>
+        <a href="学习培训.html" class="role-btn">学习培训</a>
+      </div>
+    </div>
+    <div class="tools">
+      <a href="洞察可视化.html" class="tool-card">
+        <h3>洞察可视化</h3>
+        <p>PESTEL、波特五力、SWOT 结构化填写，支持导出与 AI 提示词生成</p>
+        <span class="tag">Discovery</span>
+      </a>
+      <a href="痛点画布.html" class="tool-card">
+        <h3>痛点画布</h3>
+        <p>痛频量价、需求假设清单、验证方式与状态</p>
+        <span class="tag">Discovery</span>
+      </a>
+      <a href="Project-Brief.html" class="tool-card">
+        <h3>Project Brief</h3>
+        <p>项目简报：背景、目标市场、价值主张、L1 业务域、范围边界</p>
+        <span class="tag">Discovery</span>
+      </a>
+      <a href="商业模式画布.html" class="tool-card">
+        <h3>商业模式画布</h3>
+        <p>9 宫格填写：客户、价值主张、渠道、收入、成本等</p>
+        <span class="tag">Insight</span>
+      </a>
+      <a href="PRD-模板.html" class="tool-card">
+        <h3>PRD 模板</h3>
+        <p>产品需求文档：业务背景、功能清单、用户旅程、MVP、非功能需求</p>
+        <span class="tag">Insight</span>
+      </a>
+      <a href="BAM-追溯矩阵.html" class="tool-card">
+        <h3>BAM 追溯矩阵</h3>
+        <p>REQ↔L1↔L2↔Epic↔Story↔L3↔L4 全链路映射，支持编辑、导入、导出 JSON</p>
+        <span class="tag">Architecture</span>
+      </a>
+      <a href="规划看板.html" class="tool-card">
+        <h3>规划看板</h3>
+        <p>Epic/Story 短中长期规划，可从 BAM 导入</p>
+        <span class="tag">Launch</span>
+      </a>
+      <a href="BML-验证看板.html" class="tool-card">
+        <h3>BML 验证看板</h3>
+        <p>Build-Measure-Learn 循环，坚持/转向决策记录</p>
+        <span class="tag">Launch</span>
+      </a>
+      <a href="交付包导出.html" class="tool-card">
+        <h3>交付包导出</h3>
+        <p>汇总 Project Brief、PRD、洞察、痛点、BMC、BAM、规划、BML，含完整性检查</p>
+        <span class="tag">交付</span>
+      </a>
+      <a href="业务流可视化.html" class="tool-card">
+        <h3>业务流可视化</h3>
+        <p>业务流总览、工具数据流、企业诊断流程、BAM 追溯链、交付件流</p>
+        <span class="tag">流程图</span>
+      </a>
+      <a href="AI-Prompt生成器.html" class="tool-card">
+        <h3>AI Prompt 生成器</h3>
+        <p>将输入与方法论整理为 Prompt，输入外部 AI 后返回 DIAL-BAM 业务分析报告</p>
+        <span class="tag">AI</span>
+      </a>
+      <a href="DIAL-流程可视化.html" class="tool-card">
+        <h3>DIAL 流程可视化</h3>
+        <p>完整流程、四阶段、洞察层、数字化提升的流程图</p>
+        <span class="tag">流程图</span>
+      </a>
+      <a href="文档阅读.html" class="tool-card">
+        <h3>文档阅读</h3>
+        <p>00-06 方法论、参考框架、指导文档在线阅读</p>
+        <span class="tag">文档</span>
+      </a>
+      <a href="学习培训.html" class="tool-card">
+        <h3>学习培训</h3>
+        <p>学习 · 实训 · 考试 · 认证 闭环，战略管理、数字化、业务分析</p>
+        <span class="tag">培训</span>
+      </a>
+    </div>
+
+    <div class="docs">
+      <h2>文档与模板</h2>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">
+        <a href="文档阅读.html">📖 在线阅读</a> | 或直接下载 .md
+      </p>
+      <ul>
+        <li><a href="文档阅读.html?doc=快速开始.md"><strong>快速开始</strong></a></li>
+        <li><a href="文档阅读.html?doc=交付件清单.md">交付件清单</a></li>
+        <li><a href="文档阅读.html?doc=术语表.md">术语表</a></li>
+        <li><a href="文档阅读.html?doc=常见问题.md">常见问题 FAQ</a></li>
+        <li><a href="文档阅读.html?doc=00-核心理念.md">00 核心理念</a></li>
+        <li><a href="文档阅读.html?doc=01-方法论.md">01 方法论</a></li>
+        <li><a href="文档阅读.html?doc=平台输入与数据入口.md">平台输入与数据入口</a></li>
+        <li><a href="文档阅读.html?doc=工具应用.md">工具应用</a></li>
+        <li><a href="文档阅读.html?doc=业务流与优化指南.md">业务流与优化指南</a></li>
+        <li><a href="文档阅读.html?doc=02-Discovery.md">02 Discovery（发现）</a></li>
+        <li><a href="文档阅读.html?doc=03-Insight.md">03 Insight（洞察）</a></li>
+        <li><a href="文档阅读.html?doc=04-Architecture.md">04 Architecture（架构）</a></li>
+        <li><a href="文档阅读.html?doc=05-Launch.md">05 Launch（交付）</a></li>
+        <li><a href="文档阅读.html?doc=06-AI增强与裁剪.md">06 AI 增强与裁剪</a></li>
+        <li><a href="文档阅读.html?doc=AI-Prompt与输出报告.md">AI Prompt 与输出报告</a></li>
+        <li><a href="文档阅读.html?doc=学习培训体系.md">学习培训体系</a></li>
+        <li><a href="文档阅读.html?doc=参考框架索引.md">参考框架索引</a></li>
+        <li><a href="文档阅读.html?doc=指导文档/README.md">指导文档</a></li>
+        <li><a href="BAM-导入指南.md">BAM 导入指南</a></li>
+        <li><a href="各模块输入输出规范.md">各模块输入输出规范</a></li>
+        <li><a href="templates/README.md">输入输出模板</a></li>
+        <li><a href="BAM-工作流检查清单.md">BAM 工作流检查清单</a></li>
+        <li><a href="DIAL-规划与任务模板.md">DIAL 规划与任务模板</a></li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      使用方式：在项目根目录执行 <code>npm run serve</code> 后访问 http://localhost:3789/tools。
+      <br>DIAL-BAM Method v1.5.0 · MIT License · <a href="文档阅读.html?doc=反馈与社区.md" style="color:var(--accent)">反馈</a> · <a href="../CHANGELOG.md" style="color:var(--accent)">更新日志</a>
+    </div>
+  </div>
+  <script>
+    (function(){
+      if (!localStorage.getItem('dial-bam-newbie-seen')) {
+        var b = document.getElementById('newbieBanner');
+        if (b) b.style.display = 'block';
+      }
+    })();
+    function closeNewbieBanner() {
+      document.getElementById('newbieBanner').style.display = 'none';
+      localStorage.setItem('dial-bam-newbie-seen', '1');
+    }
+  </script>
+</body>
+</html>

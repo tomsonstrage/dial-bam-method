@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交付包导出 - DIAL-BAM Method</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .check-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 0.9rem;
+    }
+    .check-item.has { border-color: var(--success); }
+    .check-item.empty { opacity: 0.7; }
+    .check-item .name { font-weight: 500; margin-bottom: 0.25rem; }
+    .check-item a:hover .name { color: var(--accent); }
+    .check-item .stat { font-size: 0.8rem; color: var(--text-muted); }
+    .integrity {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .integrity h3 { font-size: 1rem; margin: 0 0 0.75rem 0; color: var(--accent); }
+    .integrity ul { margin: 0; padding-left: 1.25rem; font-size: 0.9rem; }
+    .integrity li { margin-bottom: 0.35rem; }
+    .integrity .ok { color: var(--success); }
+    .integrity .warn { color: var(--warning); }
+    .integrity .fail { color: #f85149; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .actions .btn { min-height: 44px; }
+      .check-grid { grid-template-columns: 1fr; }
+    }
+    .integrity a { color: inherit; }
+    .integrity a:hover { color: var(--accent); }
+    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      max-width: 400px;
+      width: 100%;
+    }
+    .modal h4 { margin: 0 0 1rem 0; color: var(--accent); }
+    .modal-options { margin: 0.75rem 0; max-height: 240px; overflow-y: auto; }
+    .modal-options label { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; cursor: pointer; font-size: 0.9rem; }
+    .modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h1>交付包导出</h1>
+  <p class="meta">汇总各工具数据，一键导出完整交付件包（JSON）</p>
+
+  <div class="check-grid" id="checkGrid"></div>
+
+  <div class="integrity" id="integritySection">
+    <h3>交付件完整性检查 <button class="btn btn-sm" onclick="runIntegrityCheck();renderCheck()" style="margin-left:0.5rem;vertical-align:middle">刷新</button></h3>
+    <ul id="integrityList"></ul>
+  </div>
+
+  <div class="actions">
+    <a href="index.html" class="btn">← 工具中心</a>
+    <button class="btn btn-primary" onclick="exportPackage()">导出交付包 JSON</button>
+    <button class="btn" onclick="exportMarkdown()">导出 Markdown 汇总</button>
+    <input type="file" id="fileImport" accept=".json" style="display:none">
+    <button class="btn" onclick="document.getElementById('fileImport').click()">从交付包导入</button>
+    <input type="file" id="fileImportSelective" accept=".json" style="display:none">
+    <button class="btn" onclick="document.getElementById('fileImportSelective').click()">选择性导入</button>
+  </div>
+
+  <div id="selectiveModal" class="modal-overlay" onclick="if(event.target===this)selectiveCancel()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h4>选择要恢复的工具</h4>
+      <div class="modal-options" id="selectiveOptions"></div>
+      <div class="modal-actions">
+        <button class="btn btn-sm" onclick="selectiveSelectAll(true)">全选</button>
+        <button class="btn btn-sm" onclick="selectiveSelectAll(false)">取消全选</button>
+        <button class="btn btn-primary" onclick="selectiveConfirm()">确认导入</button>
+        <button class="btn" onclick="selectiveCancel()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">交付包包含：洞察、痛点、Project Brief、BMC、PRD、BAM、规划、BML、实训进度。导出 JSON 可导入恢复；导出 Markdown 汇总便于阅读与归档。</p>
+
+  <script>
+    const SOURCES = [
+      { key: 'dial-bam-insight', name: '洞察可视化', tool: '洞察可视化.html' },
+      { key: 'dial-bam-pain', name: '痛点画布', tool: '痛点画布.html' },
+      { key: 'dial-bam-projectbrief', name: 'Project Brief', tool: 'Project-Brief.html' },
+      { key: 'dial-bam-bmc', name: '商业模式画布', tool: '商业模式画布.html' },
+      { key: 'dial-bam-prd', name: 'PRD 模板', tool: 'PRD-模板.html' },
+      { key: 'dial-bam-matrix', name: 'BAM 追溯矩阵', tool: 'BAM-追溯矩阵.html' },
+      { key: 'dial-bam-planning', name: '规划看板', tool: '规划看板.html' },
+      { key: 'dial-bam-bml', name: 'BML 验证看板', tool: 'BML-验证看板.html' }
+    ];
+
+    function collectPackage() {
+      const pkg = {
+        meta: {
+          name: 'DIAL-BAM 交付包',
+          version: '1.0',
+          exportedAt: new Date().toISOString(),
+          description: '洞察、痛点、Project Brief、BMC、PRD、BAM、规划、BML 汇总'
+        },
+        data: {}
+      };
+      SOURCES.forEach(s => {
+        try {
+          const raw = localStorage.getItem(s.key);
+          if (raw) pkg.data[s.key] = JSON.parse(raw);
+        } catch (_) {}
+      });
+      try {
+        const practice = localStorage.getItem('dial-bam-practice-progress');
+        if (practice) pkg.data['dial-bam-practice-progress'] = JSON.parse(practice);
+      } catch (_) {}
+      return pkg;
+    }
+
+    function runIntegrityCheck() {
+      const list = document.getElementById('integrityList');
+      list.innerHTML = '';
+      const add = (cls, text, link) => {
+        const li = document.createElement('li');
+        li.className = cls;
+        if (link) {
+          const a = document.createElement('a');
+          a.href = link;
+          a.textContent = text;
+          a.style.color = 'inherit';
+          a.style.textDecoration = cls === 'fail' ? 'underline' : 'none';
+          li.appendChild(a);
+        } else {
+          li.textContent = text;
+        }
+        list.appendChild(li);
+      };
+
+      const bam = (() => { try { return JSON.parse(localStorage.getItem('dial-bam-matrix') || '{}'); } catch(_) { return {}; } })();
+      const l1 = bam.L1?.length || 0, l2 = bam.L2?.length || 0, l3 = bam.L3?.length || 0;
+      const req = bam.requirements?.length || 0, ep = bam.epics?.length || 0, st = bam.stories?.length || 0;
+
+      if (l1 && l2 && req && ep) add('ok', '✓ BAM 追溯链：L1、L2、REQ、Epic 已填写');
+      else add('fail', '✗ BAM 追溯链不完整：需 L1、L2、requirements、epics → 去填写', 'BAM-追溯矩阵.html');
+
+      if (l3) add('ok', '✓ BAM 含 L3 业务动作');
+      else add('warn', '○ BAM 无 L3（可选）');
+
+      if (st) add('ok', '✓ BAM 含 Story');
+      else add('warn', '○ BAM 无 Story（可选）');
+
+      const insight = !!localStorage.getItem('dial-bam-insight');
+      const pain = !!localStorage.getItem('dial-bam-pain');
+      if (insight || pain) add('ok', '✓ Discovery：洞察或痛点已填写');
+      else add('warn', '○ Discovery：建议填写洞察可视化、痛点画布 → 去填写', '洞察可视化.html');
+
+      const pb = (() => { try { const d = JSON.parse(localStorage.getItem('dial-bam-projectbrief') || '{}'); return !!(d.background || d.valueProp || (d.L1 && d.L1.length)); } catch(_) { return false; } })();
+      if (pb) add('ok', '✓ Project Brief 已填写');
+      else add('warn', '○ Project Brief 未填写（可选） → 去填写', 'Project-Brief.html');
+
+      const prd = (() => { try { const d = JSON.parse(localStorage.getItem('dial-bam-prd') || '{}'); return !!(d.businessBg || (d.functions && d.functions.length)); } catch(_) { return false; } })();
+      if (prd) add('ok', '✓ PRD 已填写');
+      else add('warn', '○ PRD 未填写（可选） → 去填写', 'PRD-模板.html');
+
+      const plan = (() => { try { const d = JSON.parse(localStorage.getItem('dial-bam-planning') || '{}'); return !!(d.epics && d.epics.length); } catch(_) { return false; } })();
+      if (plan) add('ok', '✓ 规划看板已从 BAM 导入');
+      else add('warn', '○ 规划看板：建议从 BAM 导入 Epic/Story → 去填写', '规划看板.html');
+
+      const bml = (() => { try { const d = JSON.parse(localStorage.getItem('dial-bam-bml') || '{}'); return !!(d.iterations && d.iterations.length); } catch(_) { return false; } })();
+      if (bml) add('ok', '✓ BML 验证看板有迭代记录');
+      else add('warn', '○ BML 验证看板无迭代（Launch 阶段） → 去填写', 'BML-验证看板.html');
+    }
+
+    function renderCheck() {
+      const grid = document.getElementById('checkGrid');
+      grid.innerHTML = '';
+      SOURCES.forEach(s => {
+        const raw = localStorage.getItem(s.key);
+        let hasData = false;
+        let stat = '无数据';
+        try {
+          if (raw) {
+            const d = JSON.parse(raw);
+            hasData = Object.keys(d).length > 0;
+            if (s.key === 'dial-bam-matrix' && d.L1) stat = `L1:${d.L1?.length||0} REQ:${d.requirements?.length||0}`;
+            else if (s.key === 'dial-bam-planning' && d.epics) stat = `Epic:${d.epics?.length||0}`;
+            else if (s.key === 'dial-bam-bml' && d.iterations) stat = `迭代:${d.iterations?.length||0}`;
+            else if (s.key === 'dial-bam-projectbrief' && (d.background || d.L1?.length)) stat = '已填写';
+            else if (s.key === 'dial-bam-prd' && (d.businessBg || d.functions?.length)) stat = '已填写';
+            else if (hasData) stat = '已填写';
+          }
+        } catch (_) {}
+        const div = document.createElement('div');
+        div.className = 'check-item ' + (hasData ? 'has' : 'empty');
+        div.innerHTML = `<a href="${s.tool}" style="color:inherit;text-decoration:none"><div class="name">${s.name}</div><div class="stat">${stat}</div></a>`;
+        grid.appendChild(div);
+      });
+    }
+
+    function exportPackage() {
+      const pkg = collectPackage();
+      const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'DIAL-BAM-交付包-' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+    }
+
+    function formatToMd(key, d) {
+      if (!d || typeof d !== 'object') return '';
+      const name = (SOURCES.find(s=>s.key===key)||{}).name || key;
+      let s = '## ' + name + '\n\n';
+      if (key === 'dial-bam-insight') {
+        const labels = { p:'政治', e:'经济', s:'社会', t:'技术', env:'环境', l:'法律', c1:'同业竞争', c2:'供应商议价', c3:'购买者议价', c4:'替代品威胁', c5:'新进入者威胁', sw1:'优势', sw2:'劣势', sw3:'机会', sw4:'威胁' };
+        Object.entries(d).forEach(([k,v]) => { if (v && typeof v === 'string') s += '**' + (labels[k]||k) + '**: ' + v + '\n\n'; });
+      } else if (key === 'dial-bam-pain') {
+        s += '**痛**: ' + (d.pain||'') + '\n\n**频**: ' + (d.freq||'') + '\n\n**量**: ' + (d.vol||'') + '\n\n**价**: ' + (d.price||'') + '\n\n';
+        if ((d.hypotheses||[]).length) { s += '### 需求假设\n\n'; d.hypotheses.forEach(h=>s+=`- ${h.id||''} ${h.hyp||''} | 验证:${h.verify||''} | ${h.status||'待验证'}\n`); s+='\n'; }
+      } else if (key === 'dial-bam-bmc') {
+        const labels = { partners:'关键合作', activities:'关键活动', resources:'核心资源', value:'价值主张', relationships:'客户关系', channels:'渠道通路', segments:'客户细分', costs:'成本结构', revenue:'收入来源' };
+        Object.entries(d).forEach(([k,v]) => { if (v && typeof v === 'string') s += '**' + (labels[k]||k) + '**: ' + v + '\n\n'; });
+      } else if (key === 'dial-bam-projectbrief') {
+        ['background','targetMarket','valueProp','assumptions','scope','exclusions'].forEach(k => { if (d[k]) s += '### ' + k + '\n\n' + d[k] + '\n\n'; });
+        if ((d.L1||[]).length) { s += '### L1 业务域\n\n| ID | 名称 |\n|----|------|\n'; d.L1.forEach(x=>s+=`| ${x.id||'-'} | ${x.name||'-'} |\n`); }
+      } else if (key === 'dial-bam-prd') {
+        ['businessBg','targetUser','userJourney','mvpScope','nfr'].forEach(k => { if (d[k]) s += '### ' + k + '\n\n' + d[k] + '\n\n'; });
+        if ((d.functions||[]).length) { s += '### 功能清单\n\n| L2 | 功能 | 说明 | MVP |\n|----|------|------|-----|\n'; d.functions.forEach(x=>s+=`| ${x.id||'-'} | ${x.name||'-'} | ${x.desc||'-'} | ${x.mvp==='yes'?'是':'否'} |\n`); }
+      } else if (key === 'dial-bam-matrix') {
+        if (d.meta?.name) s += '**项目**: ' + d.meta.name + '\n\n';
+        if ((d.L1||[]).length) { s += '### L1\n\n'; d.L1.forEach(x=>s+=`- ${x.id} ${x.name}\n`); s+='\n'; }
+        if ((d.L2||[]).length) { s += '### L2\n\n'; d.L2.forEach(x=>s+=`- ${x.id} ${x.name}\n`); s+='\n'; }
+        if ((d.requirements||[]).length) { s += '### REQ\n\n'; d.requirements.forEach(x=>s+=`- ${x.id} ${x.name}\n`); s+='\n'; }
+        if ((d.epics||[]).length) { s += '### Epic\n\n'; d.epics.forEach(x=>s+=`- ${x.id} ${x.name}\n`); }
+      } else if (key === 'dial-bam-planning' && (d.epics||[]).length) {
+        (d.epics||[]).forEach(e => { s += '### ' + (e.id||'') + ' ' + (e.name||'') + ' (' + (e.horizon||'') + ')\n\n'; (e.stories||[]).forEach(st=>s+=`- ${st.id} ${st.name}\n`); s+='\n'; });
+      } else if (key === 'dial-bam-bml' && (d.iterations||[]).length) {
+        (d.iterations||[]).forEach((it,i) => s += `### 迭代${i+1}\n\nBuild: ${it.build||''}\n\nMeasure: ${it.measure||''}\n\nLearn: ${it.learn||''}\n\n决策: ${it.decision||''}\n\n`);
+      } else if (key === 'dial-bam-practice') {
+        const labels = { 'practice-insight':'洞察分析','practice-pain':'痛点验证','practice-bam':'BAM追溯','practice-bml':'BML验证','practice-bmc':'商业模式画布','practice-plan':'规划看板','practice-delivery':'交付包导出' };
+        Object.entries(d).forEach(([k,v]) => { if (Array.isArray(v) && v.length) s += '- ' + (labels[k]||k) + '：' + v.length + ' 步已完成\n'; });
+      } else {
+        const skip = ['meta','L1','L2','L3','L4','requirements','epics','stories','iterations','hypotheses','functions'];
+        Object.entries(d).filter(([k])=>!skip.includes(k)).forEach(([k,v]) => { if (v && typeof v !== 'object') s += '**' + k + '**: ' + v + '\n\n'; });
+      }
+      return s;
+    }
+
+    function exportMarkdown() {
+      const pkg = collectPackage();
+      let md = '# DIAL-BAM 交付包汇总\n\n导出时间：' + (pkg.meta?.exportedAt || new Date().toISOString()) + '\n\n---\n\n';
+      Object.entries(pkg.data || {}).forEach(([key, d]) => {
+        const section = formatToMd(key, d);
+        if (section) md += section + '\n';
+      });
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'DIAL-BAM-交付包-' + new Date().toISOString().slice(0,10) + '.md';
+      a.click();
+    }
+
+    let _selectivePkg = null;
+
+    function getSourceName(key) {
+      const s = SOURCES.find(x => x.key === key);
+      if (s) return s.name;
+      if (key === 'dial-bam-practice-progress' || key === 'dial-bam-practice') return '实训进度';
+      return key;
+    }
+
+    function selectiveSelectAll(checked) {
+      document.querySelectorAll('#selectiveOptions input[type="checkbox"]').forEach(cb => cb.checked = checked);
+    }
+
+    function selectiveConfirm() {
+      if (!_selectivePkg || !_selectivePkg.data) return;
+      let count = 0;
+      document.querySelectorAll('#selectiveOptions input[type="checkbox"]:checked').forEach(cb => {
+        const key = cb.getAttribute('data-key');
+        if (_selectivePkg.data[key] !== undefined) {
+          try {
+            const storeKey = key === 'dial-bam-practice' ? 'dial-bam-practice-progress' : key;
+            localStorage.setItem(storeKey, JSON.stringify(_selectivePkg.data[key]));
+            count++;
+          } catch (_) {}
+        }
+      });
+      selectiveCancel();
+      alert('已恢复 ' + count + ' 个工具的数据。请刷新各工具页面。');
+      renderCheck();
+      runIntegrityCheck();
+    }
+
+    function selectiveCancel() {
+      _selectivePkg = null;
+      document.getElementById('selectiveModal').classList.remove('show');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('selectiveModal').classList.contains('show')) selectiveCancel();
+    });
+
+    document.getElementById('fileImportSelective').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const pkg = JSON.parse(r.result);
+          if (!pkg.data || typeof pkg.data !== 'object') throw new Error('无效的交付包格式');
+          _selectivePkg = pkg;
+          const opts = document.getElementById('selectiveOptions');
+          opts.innerHTML = '';
+          Object.keys(pkg.data).forEach(key => {
+            const label = document.createElement('label');
+            const safe = (s) => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+            label.innerHTML = `<input type="checkbox" data-key="${safe(key)}" checked> ${safe(getSourceName(key))}`;
+            opts.appendChild(label);
+          });
+          document.getElementById('selectiveModal').classList.add('show');
+        } catch (err) {
+          alert('导入失败：' + (err.message || '无效的 JSON'));
+        }
+        e.target.value = '';
+      };
+      r.readAsText(f, 'UTF-8');
+    });
+
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const pkg = JSON.parse(r.result);
+          if (!pkg.data || typeof pkg.data !== 'object') throw new Error('无效的交付包格式');
+          let count = 0;
+          Object.entries(pkg.data).forEach(([key, val]) => {
+            try {
+              let storeKey = key;
+              if (key === 'dial-bam-practice') storeKey = 'dial-bam-practice-progress';
+              localStorage.setItem(storeKey, JSON.stringify(val));
+              count++;
+            } catch (_) {}
+          });
+          alert('导入成功，已恢复 ' + count + ' 个工具的数据。请刷新各工具页面。');
+          renderCheck();
+          runIntegrityCheck();
+        } catch (err) {
+          alert('导入失败：' + (err.message || '无效的 JSON'));
+        }
+        e.target.value = '';
+      };
+      r.readAsText(f, 'UTF-8');
+    });
+
+    renderCheck();
+    runIntegrityCheck();
+  </script>
+</body>
+</html>

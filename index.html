@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIAL-BAM Method - 业务分析及软件开发体系</title>
+  <meta name="description" content="DIAL（Discovery→Insight→Architecture→Launch）+ BAM 业务架构追溯，行业分析→需求→方案→数字化→规划→任务拆解">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      z-index: 999;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+    }
+    .skip-link:focus { left: 0.5rem; top: 0.5rem; }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 2.5rem;
+      background: linear-gradient(180deg, rgba(26,35,50,0.6) 0%, transparent 100%);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+    .hero h1 { font-size: 1.9rem; margin: 0 0 0.5rem 0; letter-spacing: 0.02em; }
+    .hero .tagline {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+    }
+    .hero .one-liner {
+      font-size: 0.95rem;
+      color: var(--text);
+      max-width: 540px;
+      margin: 0 auto 1.5rem;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+    .flow-item {
+      padding: 0.35rem 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+    .flow-item strong { color: var(--accent); }
+    .flow-arrow { color: var(--text-muted); font-size: 0.9rem; }
+    .trace-chain {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: "Consolas", "Monaco", monospace;
+      margin-top: 0.5rem;
+    }
+    section {
+      padding: 1.75rem 0;
+    }
+    section h2 {
+      font-size: 1.1rem;
+      margin: 0 0 1rem 0;
+      color: var(--accent);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .grid-2 .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .grid-2 .card h2 { margin-top: 0; }
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    .principle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+    .principle strong { display: block; margin-bottom: 0.25rem; color: var(--text); }
+    .principle span { color: var(--text-muted); font-size: 0.85rem; }
+    .audience ul, .problems ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .audience li, .problems li { margin-bottom: 0.35rem; }
+    .entry-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .data-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      font-size: 0.8rem;
+      margin: 0.5rem 0;
+    }
+    .data-flow .node {
+      padding: 0.3rem 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+    .data-flow .arr { color: var(--text-muted); font-size: 0.75rem; }
+    .tool-map { font-size: 0.9rem; }
+    .tool-map table { width: 100%; border-collapse: collapse; }
+    .tool-map .table-wrap { overflow-x: auto; }
+    .tool-map th, .tool-map td {
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .tool-map th { color: var(--text-muted); font-weight: 500; }
+    .tool-map a { color: var(--accent); text-decoration: none; }
+    .tool-map a:hover { text-decoration: underline; }
+    .tool-map .phase { font-size: 0.8rem; color: var(--text-muted); }
+    .bmad-note {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.9rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .bmad-note strong { color: var(--text); }
+    .links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .links a {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    .links a:hover { border-color: var(--accent); background: var(--surface2); }
+    .links a.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 1.5rem 0;
+    }
+    .footer a { color: var(--accent); }
+    @media (max-width: 700px) {
+      .flow-row { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .principles { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .principles { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">跳转到主内容</a>
+  <div class="container" id="main">
+    <header class="hero">
+      <h1>DIAL-BAM Method</h1>
+      <p class="tagline">业务分析及软件开发体系</p>
+      <p class="one-liner">从行业洞察到任务拆解的完整流程，战略导向、端到端追溯，适配 AI 与 Vibe coding。</p>
+      <div class="flow-row" aria-label="DIAL 四阶段">
+        <span class="flow-item"><strong>Discovery</strong> 洞察</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item"><strong>Insight</strong> 战略</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item"><strong>Architecture</strong> 架构</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-item"><strong>Launch</strong> 交付</span>
+      </div>
+      <p class="trace-chain">BAM 追溯链：REQ ↔ L1 ↔ L2 ↔ Epic ↔ Story ↔ L3 ↔ L4</p>
+    </header>
+
+    <section>
+      <h2>四大核心理念</h2>
+      <div class="principles">
+        <div class="principle"><strong>战略导向</strong><span>洞察→战略，目标可分解</span></div>
+        <div class="principle"><strong>流程分层</strong><span>L1→L2→L3→L4 递进</span></div>
+        <div class="principle"><strong>端到端追溯</strong><span>业务→需求→交付可追溯</span></div>
+        <div class="principle"><strong>闭环管理</strong><span>PDCA、BML、坚持/转向有依据</span></div>
+      </div>
+    </section>
+
+    <div class="grid-2">
+      <section class="audience card">
+        <h2>适用对象</h2>
+        <ul>
+          <li>产品经理、业务分析师：需要从洞察到需求的完整链路</li>
+          <li>架构师、技术负责人：需要业务架构与需求追溯</li>
+          <li>创业团队：需要 MVP 验证、BML 迭代</li>
+          <li>使用 AI 辅助开发：需要结构化输入与可追溯输出</li>
+        </ul>
+      </section>
+      <section class="problems card">
+        <h2>解决的问题</h2>
+        <ul>
+          <li>需求分析、业务架构、开发交付各成体系，难以追溯</li>
+          <li>战略与执行脱节，改一处不知影响范围</li>
+          <li>缺乏统一流程，框架堆砌成「大杂烩」</li>
+          <li>AI 生成内容难以与业务结构对齐</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="grid-2" style="margin-top:1.5rem">
+      <section>
+        <h2>典型数据流</h2>
+        <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.5rem">各工具产出串联，形成完整链路</p>
+        <div class="data-flow" aria-label="数据流">
+          <span class="node">洞察</span><span class="arr">→</span>
+          <span class="node">痛点</span><span class="arr">→</span>
+          <span class="node">Project Brief</span><span class="arr">→</span>
+          <span class="node">BMC</span><span class="arr">→</span>
+          <span class="node">PRD</span><span class="arr">→</span>
+          <span class="node">BAM</span><span class="arr">→</span>
+          <span class="node">规划</span><span class="arr">→</span>
+          <span class="node">BML</span>
+        </div>
+      </section>
+      <section class="tool-map">
+        <h2>工具与阶段映射</h2>
+        <div class="table-wrap">
+        <table>
+        <tr><th>工具</th><th>DIAL 阶段</th></tr>
+        <tr><td><a href="tools/洞察可视化.html">洞察可视化</a></td><td class="phase">Discovery</td></tr>
+        <tr><td><a href="tools/痛点画布.html">痛点画布</a></td><td class="phase">Discovery</td></tr>
+        <tr><td><a href="tools/Project-Brief.html">Project Brief</a></td><td class="phase">Discovery</td></tr>
+        <tr><td><a href="tools/商业模式画布.html">商业模式画布</a></td><td class="phase">Insight</td></tr>
+        <tr><td><a href="tools/PRD-模板.html">PRD 模板</a></td><td class="phase">Insight</td></tr>
+        <tr><td><a href="tools/BAM-追溯矩阵.html">BAM 追溯矩阵</a></td><td class="phase">Architecture</td></tr>
+        <tr><td><a href="tools/规划看板.html">规划看板</a></td><td class="phase">Launch</td></tr>
+        <tr><td><a href="tools/BML-验证看板.html">BML 验证看板</a></td><td class="phase">Launch</td></tr>
+        <tr><td><a href="tools/交付包导出.html">交付包导出</a></td><td class="phase">交付</td></tr>
+      </table>
+        </div>
+      </section>
+    </div>
+
+    <section>
+      <h2>与 BMAD 协作</h2>
+      <div class="bmad-note">
+        <strong>BMAD</strong> 是 AI 驱动开发框架（Agent、Workflow、Context）。<strong>DIAL-BAM</strong> 做 Discovery/Insight/Architecture，BMAD 做 Phase 3/4 方案设计与实施。纯方法论用 DIAL-BAM；有 Cursor/Copilot 可加 AI 辅助；已用 BMAD 可加 DIAL-BAM 补充发现与追溯。
+      </div>
+    </section>
+
+    <section class="entry-bar">
+      <h2>入口</h2>
+      <div class="links">
+        <a href="tools/index.html" class="primary">进入工具中心</a>
+        <a href="tools/文档阅读.html?doc=快速开始.md">快速开始</a>
+        <a href="tools/文档阅读.html?doc=00-核心理念.md">核心理念</a>
+        <a href="tools/文档阅读.html?doc=01-方法论.md">方法论</a>
+        <a href="tools/文档阅读.html?doc=交付件清单.md">交付件清单</a>
+        <a href="tools/文档阅读.html">文档阅读</a>
+        <a href="tools/BAM-追溯矩阵.html">BAM 示例</a>
+        <a href="tools/交付包导出.html">交付包导出</a>
+        <a href="README.md">README</a>
+        <a href="CHANGELOG.md">更新日志</a>
+      </div>
+    </section>
+
+    <footer class="footer">
+      v1.5.0 · MIT License · 参考华为、精益创业、一堂、TOGAF、BMAD
+    </footer>
+  </div>
+</body>
+</html>

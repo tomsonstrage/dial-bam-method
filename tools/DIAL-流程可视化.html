@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIAL 流程可视化 - DIAL-BAM Method</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 0.5rem 0; }
+    .meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      padding: 0.6rem 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+    .diagram .mermaid { display: flex; justify-content: center; }
+    .legend {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--surface2);
+      border-radius: 6px;
+    }
+    .legend h4 { margin: 0 0 0.5rem 0; color: var(--text); }
+    .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .tabs { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <h1>DIAL 流程可视化</h1>
+  <p class="meta">洞察 → 战略 → 业务需求 → 数字化提升，全链路流程图 <a href="index.html" style="color:var(--accent);margin-left:1rem">← 工具中心</a></p>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="full">完整流程</button>
+    <button class="tab" data-tab="dial">DIAL 四阶段</button>
+    <button class="tab" data-tab="insight">洞察层</button>
+    <button class="tab" data-tab="digital">数字化提升</button>
+  </div>
+
+  <div id="panel-full" class="panel active">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TB
+    subgraph 洞察["🔍 洞察层"]
+        P[PESTEL 宏观环境]
+        F[波特五力 竞争]
+        S[SWOT 内外部]
+    end
+
+    subgraph 战略["📋 战略规划"]
+        SM[战略地图]
+        BC[商业模式画布]
+    end
+
+    subgraph 业务["📦 业务需求"]
+        O1[运营提效]
+        O2[新增业务]
+        O3[体验提升]
+    end
+
+    subgraph 数字化["⚙️ 数字化提升"]
+        D1[流程自动化]
+        D2[数据辅助]
+        D3[新触点/新能力]
+    end
+
+    洞察 --> 战略 --> 业务 --> 数字化
+    </div>
+    <div class="legend">
+      <h4>完整流程</h4>
+      洞察（行业/社会/技术/竞争/内部）→ 战略规划 → 业务需求（运营提效、新增业务）→ 数字化系统与工具
+    </div>
+  </div>
+
+  <div id="panel-dial" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart LR
+    D[Discovery 发现]
+    I[Insight 洞察]
+    A[Architecture 架构]
+    L[Launch 交付]
+
+    D --> I --> A --> L
+
+    D -.-> D1[洞察+需求调研]
+    I -.-> I1[解决方案+战略]
+    A -.-> A1[业务架构+规划]
+    L -.-> L1[任务拆解+迭代]
+    </div>
+    <div class="legend">
+      <h4>DIAL 四阶段</h4>
+      Discovery（洞察、需求调研）→ Insight（解决方案、战略）→ Architecture（业务架构、规划）→ Launch（任务拆解、BML 迭代）
+    </div>
+  </div>
+
+  <div id="panel-insight" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TB
+    subgraph PESTEL["PESTEL"]
+        P[Political 政治]
+        E[Economic 经济]
+        S[Social 社会]
+        T[Technological 技术]
+        E2[Environmental 环境]
+        L[Legal 法律]
+    end
+
+    subgraph 五力["波特五力"]
+        C1[同业竞争]
+        C2[供应商议价]
+        C3[购买者议价]
+        C4[替代品威胁]
+        C5[新进入者威胁]
+    end
+
+    subgraph SWOT["SWOT"]
+        SW1[Strengths 优势]
+        SW2[Weaknesses 劣势]
+        SW3[Opportunities 机会]
+        SW4[Threats 威胁]
+    end
+
+    PESTEL --> 战略
+    五力 --> 战略
+    SWOT --> 战略
+    战略[战略规划]
+    </div>
+    <div class="legend">
+      <h4>洞察层参考框架</h4>
+      PESTEL：宏观环境 | 波特五力：竞争格局 | SWOT：内外部综合 → 输入战略规划
+    </div>
+  </div>
+
+  <div id="panel-digital" class="panel">
+    <div class="diagram">
+      <div class="mermaid">
+flowchart TB
+    subgraph 业务需求["业务需求"]
+        R1[运营提效]
+        R2[新增业务]
+    end
+
+    subgraph 提效["运营提效 → 数字化"]
+        T1[流程自动化]
+        T2[数据辅助决策]
+        T3[协同效率]
+        T4[减少重复劳动]
+    end
+
+    subgraph 新增["新增业务 → 数字化"]
+        N1[新触点/渠道]
+        N2[新能力/AI]
+        N3[新商业模式]
+        N4[新生态对接]
+    end
+
+    R1 --> 提效
+    R2 --> 新增
+    </div>
+    <div class="legend">
+      <h4>数字化提升方向（参考 MIT 九要素）</h4>
+      运营提效：自动化、数据化、协同 | 新增业务：新触点、新能力、新模式、新生态
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#1a2332',
+        primaryTextColor: '#e6edf3',
+        primaryBorderColor: '#30363d',
+        lineColor: '#58a6ff',
+        secondaryColor: '#243044',
+        tertiaryColor: '#0f1419'
+      }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((el, i) => {
+      mermaid.run({ nodes: [el], suppressErrors: true }).catch(() => {});
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

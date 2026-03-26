@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BAM 追溯矩阵 - DIAL-BAM Method</title>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: #388bfd66;
+      --success: #3fb950;
+      --warning: #d29922;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      color: var(--text);
+    }
+    .meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .filter-group label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    select {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      padding: 0.6rem 1rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    .panel.active { display: block; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    tr:hover td { background: var(--surface2); }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    .badge-p1 { background: var(--success); color: #fff; }
+    .badge-p2 { background: var(--warning); color: #000; }
+    .chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8rem;
+    }
+    .chain-item {
+      background: var(--surface2);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+    .chain-arrow { color: var(--text-muted); }
+    .trace-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .trace-card h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+    .trace-card .chain { margin-top: 0.5rem; }
+    .empty { color: var(--text-muted); font-style: italic; }
+    .toolbar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .btn:hover { background: var(--surface2); border-color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #4c9aed; }
+    .btn-outline { background: transparent; }
+    .workflow-bar a { color: var(--text-muted); text-decoration: none; }
+    .workflow-bar a:hover { color: var(--accent); }
+    .from-hint {
+      background: rgba(88,166,255,0.15);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .edit-section { margin-bottom: 1.5rem; }
+    .edit-section h4 { margin: 0 0 0.75rem 0; font-size: 1rem; color: var(--accent); }
+    .edit-section table { margin-bottom: 0.5rem; }
+    .edit-section input, .edit-section select {
+      width: 100%;
+      min-width: 80px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.35rem 0.5rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+    }
+    .edit-section .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    .edit-section .row-actions { white-space: nowrap; }
+    @media (max-width: 768px) {
+      body { padding: 1rem; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar .btn, .toolbar a.btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
+      .filters { flex-direction: column; }
+      .tabs { flex-wrap: wrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .tab { min-height: 44px; padding: 0.6rem 0.75rem; flex-shrink: 0; }
+      .edit-section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .edit-section table { min-width: 500px; }
+      .panel { padding: 0.75rem; }
+    }
+  @media (max-width: 480px) {
+    h1 { font-size: 1.25rem; }
+    .workflow-bar { font-size: 0.75rem; }
+  }
+    .btn:focus-visible, .tab:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <h1>BAM 追溯矩阵</h1>
+  <p class="meta" id="meta">REQ ↔ L1 ↔ L2 ↔ Epic ↔ Story ↔ L3 ↔ L4 全链路映射</p>
+  <nav class="workflow-bar" style="display:flex;flex-wrap:wrap;gap:0.25rem;font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">
+    <a href="index.html">工具中心</a><span style="color:var(--border)">→</span>
+    <a href="洞察可视化.html">洞察</a><span style="color:var(--border)">→</span>
+    <a href="痛点画布.html">痛点</a><span style="color:var(--border)">→</span>
+    <span style="color:var(--accent)">BAM</span><span style="color:var(--border)">→</span>
+    <a href="规划看板.html">规划</a><span style="color:var(--border)">→</span>
+    <a href="交付包导出.html">交付包</a>
+  </nav>
+
+  <div id="fromPainBanner" class="from-hint" style="display:none">
+    您刚从痛点画布过来。可点击「痛点画布生成初稿」复制 AI 提示词 → 粘贴到 AI 获取 JSON → 点击「导入 JSON」上传。
+    <button class="btn btn-sm" onclick="document.getElementById('fromPainBanner').style.display='none'" style="margin-left:0.5rem">关闭</button>
+  </div>
+
+  <div class="toolbar">
+    <a href="index.html" class="btn btn-outline">← 工具中心</a>
+    <input type="file" id="fileImport" accept=".json,.xlsx,.xls" style="display:none">
+    <button class="btn btn-outline" onclick="downloadTemplate()">下载模板</button>
+    <button class="btn btn-outline" onclick="document.getElementById('fileImport').click()">导入 JSON / Excel</button>
+    <button class="btn btn-primary" onclick="exportJSON()">导出 JSON</button>
+    <button class="btn btn-outline" onclick="loadSample()">加载示例</button>
+    <a href="洞察可视化.html" class="btn btn-outline">洞察生成需求</a>
+    <button class="btn btn-outline" onclick="copyFromPain()">痛点画布生成初稿</button>
+    <button class="btn btn-outline" onclick="copyFromProjectBrief()">从 Project Brief 导入 L1</button>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>需求</label>
+      <select id="filterReq">
+        <option value="">全部</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>一级域</label>
+      <select id="filterL1">
+        <option value="">全部</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>二级模块</label>
+      <select id="filterL2">
+        <option value="">全部</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Epic</label>
+      <select id="filterEpic">
+        <option value="">全部</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="matrix">追溯矩阵</button>
+    <button class="tab" data-tab="chain">链路视图</button>
+    <button class="tab" data-tab="l3">L3/L4 明细</button>
+    <button class="tab" data-tab="edit">编辑</button>
+  </div>
+
+  <div id="panel-matrix" class="panel active">
+    <table>
+      <thead>
+        <tr>
+          <th>REQ</th>
+          <th>L1</th>
+          <th>L2</th>
+          <th>Epic</th>
+          <th>Story</th>
+          <th>L3</th>
+        </tr>
+      </thead>
+      <tbody id="matrixBody"></tbody>
+    </table>
+  </div>
+
+  <div id="panel-chain" class="panel">
+    <div id="chainContent"></div>
+  </div>
+
+  <div id="panel-l3" class="panel">
+    <table>
+      <thead>
+        <tr>
+          <th>L3</th>
+          <th>名称</th>
+          <th>L2</th>
+          <th>L4 步骤</th>
+        </tr>
+      </thead>
+      <tbody id="l3Body"></tbody>
+    </table>
+  </div>
+
+  <div id="panel-edit" class="panel">
+    <div class="edit-section">
+      <h4>L1 一级业务域</h4>
+      <table>
+        <thead><tr><th>ID</th><th>名称</th><th>描述</th><th></th></tr></thead>
+        <tbody id="editL1"></tbody>
+      </table>
+      <button class="btn btn-sm" onclick="addRow('L1')">+ 新增 L1</button>
+    </div>
+    <div class="edit-section">
+      <h4>L2 二级模块</h4>
+      <table>
+        <thead><tr><th>ID</th><th>名称</th><th>路由</th><th>L1</th><th></th></tr></thead>
+        <tbody id="editL2"></tbody>
+      </table>
+      <button class="btn btn-sm" onclick="addRow('L2')">+ 新增 L2</button>
+    </div>
+    <div class="edit-section">
+      <h4>L3 业务动作</h4>
+      <table>
+        <thead><tr><th>ID</th><th>名称</th><th>L2</th><th>L4 步骤（逗号分隔）</th><th></th></tr></thead>
+        <tbody id="editL3"></tbody>
+      </table>
+      <button class="btn btn-sm" onclick="addRow('L3')">+ 新增 L3</button>
+    </div>
+    <div class="edit-section">
+      <h4>需求 REQ</h4>
+      <table>
+        <thead><tr><th>ID</th><th>名称</th><th>优先级</th><th>L1（逗号分隔）</th><th>L2（逗号分隔）</th><th>Epic</th><th></th></tr></thead>
+        <tbody id="editReq"></tbody>
+      </table>
+      <button class="btn btn-sm" onclick="addRow('req')">+ 新增需求</button>
+    </div>
+    <div class="edit-section">
+      <h4>Epic</h4>
+      <table>
+        <thead><tr><th>ID</th><th>名称</th><th>REQ（逗号分隔）</th><th>L2（逗号分隔）</th><th></th></tr></thead>
+        <tbody id="editEpic"></tbody>
+      </table>
+      <button class="btn btn-sm" onclick="addRow('epic')">+ 新增 Epic</button>
+    </div>
+    <div class="edit-section">
+      <h4>Story</h4>
+      <table>
+        <thead><tr><th>ID</th><th>Epic</th><th>名称</th><th>L3（逗号分隔）</th><th></th></tr></thead>
+        <tbody id="editStory"></tbody>
+      </table>
+      <button class="btn btn-sm" onclick="addRow('story')">+ 新增 Story</button>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'dial-bam-matrix';
+    let data = null;
+
+    async function loadData(fromFile) {
+      if (fromFile) {
+        data = fromFile;
+      } else {
+        try {
+          let res = await fetch('BAM-追溯矩阵.json');
+          if (!res.ok) res = await fetch('BAM-追溯矩阵-模板.json');
+          data = await res.json();
+        } catch (e) {
+          try {
+            const res = await fetch('BAM-追溯矩阵-模板.json');
+            data = await res.json();
+          } catch (e2) {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+              data = JSON.parse(stored);
+            } else {
+              document.getElementById('meta').textContent = '无法加载数据。请导入 JSON 或使用 npx serve 后访问';
+              return;
+            }
+          }
+        }
+      }
+      ensureDataStructure();
+      data.meta.updated = new Date().toISOString().slice(0, 10);
+      document.getElementById('meta').textContent = `${data.meta.description} | ${data.meta.updated}`;
+      initFilters();
+      renderMatrix();
+      renderChain();
+      renderL3();
+      renderEdit();
+    }
+
+    function ensureDataStructure() {
+      data.meta = data.meta || { name: '', version: '1.0', updated: '', description: 'REQ ↔ L1 ↔ L2 ↔ Epic ↔ Story ↔ L3 ↔ L4' };
+      data.L1 = data.L1 || [];
+      data.L2 = data.L2 || [];
+      data.L3 = data.L3 || [];
+      data.requirements = data.requirements || [];
+      data.epics = data.epics || [];
+      data.stories = data.stories || [];
+    }
+
+    async function downloadTemplate() {
+      try {
+        const r = await fetch('BAM-追溯矩阵-模板.json');
+        const t = r.ok ? await r.json() : null;
+        if (!t) throw new Error();
+        const blob = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'BAM-追溯矩阵-模板.json';
+        a.click();
+      } catch (_) {
+        alert('下载模板失败，请使用 npx serve 后访问');
+      }
+    }
+
+    async function loadSample() {
+      try {
+        const res = await fetch('BAM-追溯矩阵-示例.json');
+        if (!res.ok) throw new Error('示例文件不存在');
+        const d = await res.json();
+        loadData(d);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+        alert('已加载示例数据');
+      } catch (e) {
+        alert('加载示例失败，请确保 BAM-追溯矩阵-示例.json 存在');
+      }
+    }
+
+    function copyFromPain() {
+      try {
+        const pain = JSON.parse(localStorage.getItem('dial-bam-pain') || '{}');
+        const hyp = (pain.hypotheses || []).map(h => `${h.id||'-'} ${h.hyp||''} | 验证:${h.verify||''} | ${h.status||'待验证'}`).join('\n');
+        const prompt = `请基于以下痛频量价与需求假设，生成 BAM 追溯矩阵的 JSON 初稿。输出格式必须为纯 JSON。
+
+【痛频量价】
+痛：${pain.pain||'（待填写）'}
+频：${pain.freq||'（待填写）'}
+量：${pain.vol||'（待填写）'}
+价：${pain.price||'（待填写）'}
+
+【需求假设】
+${hyp || '（无）'}
+
+请输出符合 BAM 结构的 JSON（仅输出 JSON）：含 meta、L1、L2、L3、requirements、epics、stories。`;
+        navigator.clipboard.writeText(prompt).then(() => alert('已复制痛点画布生成提示词。粘贴到 AI 获取 JSON 后，点击「导入 JSON」即可。'));
+      } catch (e) {
+        alert('未找到痛点画布数据，请先在痛点画布填写后重试。');
+      }
+    }
+
+    function copyFromProjectBrief() {
+      try {
+        const pb = JSON.parse(localStorage.getItem('dial-bam-projectbrief') || '{}');
+        const l1 = pb.L1 || [];
+        if (!l1.length) { alert('Project Brief 无 L1 数据，请先在 Project Brief 填写 L1 业务域。'); return; }
+        data.L1 = l1.map(x => ({ id: x.id || x.code || '', name: x.name || x.title || '', desc: x.desc || '' }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        renderEdit();
+        alert('已从 Project Brief 导入 ' + data.L1.length + ' 个 L1。');
+      } catch (e) { alert('读取 Project Brief 失败：' + (e.message || '无效数据')); }
+    }
+
+    function validateBAM(d) {
+      if (!d || typeof d !== 'object') return { ok: false, msg: '无效的 JSON 对象' };
+      const has = (k) => Array.isArray(d[k]) || (d[k] && typeof d[k] === 'object');
+      if (!has('meta') && !has('L1') && !has('L2') && !has('requirements') && !has('epics')) {
+        return { ok: false, msg: '缺少 BAM 结构。需包含 meta、L1、L2、requirements、epics、stories、L3 等字段。' };
+      }
+      for (const k of ['L1','L2','L3','requirements','epics','stories']) {
+        if (d[k] !== undefined && !Array.isArray(d[k])) {
+          return { ok: false, msg: `字段 ${k} 应为数组` };
+        }
+      }
+      return { ok: true };
+    }
+
+    function parseExcelToBAM(workbook) {
+      const toArr = (v) => !v ? [] : String(v).split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+      const out = { meta: { name: 'BAM 追溯矩阵', version: '1.0', updated: new Date().toISOString().slice(0,10), description: 'REQ ↔ L1 ↔ L2 ↔ Epic ↔ Story ↔ L3 ↔ L4' }, L1: [], L2: [], L3: [], requirements: [], epics: [], stories: [] };
+      const readSheet = (name, cols) => {
+        const sh = workbook.Sheets[name] || workbook.Sheets[Object.keys(workbook.Sheets).find(k=>k.toLowerCase().includes(name.toLowerCase()))];
+        if (!sh) return [];
+        const rows = XLSX.utils.sheet_to_json(sh, { header: 1, defval: '' });
+        if (rows.length < 2) return [];
+        const h = rows[0].map(c=>String(c||'').trim().toLowerCase());
+        const col = (k) => { const i = h.findIndex(x=>x.includes(String(k).toLowerCase())); return i>=0 ? i : cols.indexOf(k); };
+        return rows.slice(1).filter(r=>r.some(c=>c)).map(r=>{
+          const o = {};
+          cols.forEach((c,i)=>{ const v = r[col(c)] ?? r[i]; o[c] = v; });
+          return o;
+        });
+      };
+      const l1Rows = readSheet('L1', ['id','name','desc']);
+      out.L1 = l1Rows.map(r=>({ id: String(r.id||'').trim()||undefined, name: String(r.name||'').trim(), desc: String(r.desc||'').trim() })).filter(x=>x.id);
+      const l2Rows = readSheet('L2', ['id','name','route','L1']);
+      out.L2 = l2Rows.map(r=>({ id: String(r.id||'').trim()||undefined, name: String(r.name||'').trim(), route: String(r.route||'').trim(), L1: String(r.L1||'').trim() })).filter(x=>x.id);
+      const reqRows = readSheet('requirements', ['id','name','priority','L1','L2','epic']);
+      out.requirements = reqRows.map(r=>({ id: String(r.id||'').trim()||undefined, name: String(r.name||'').trim(), priority: String(r.priority||'P2').trim(), L1: toArr(r.L1), L2: toArr(r.L2), epic: String(r.epic||'').trim() })).filter(x=>x.id);
+      const epicRows = readSheet('epics', ['id','name','reqs','L2']);
+      out.epics = epicRows.map(r=>({ id: String(r.id||'').trim()||undefined, name: String(r.name||'').trim(), reqs: toArr(r.reqs), L2: toArr(r.L2) })).filter(x=>x.id);
+      const storyRows = readSheet('stories', ['id','epic','name','L3']);
+      out.stories = storyRows.map(r=>({ id: String(r.id||'').trim()||undefined, epic: String(r.epic||'').trim(), name: String(r.name||'').trim(), L3: toArr(r.L3) })).filter(x=>x.id);
+      const l3Rows = readSheet('L3', ['id','name','L2','L4']);
+      out.L3 = l3Rows.map(r=>({ id: String(r.id||'').trim()||undefined, name: String(r.name||'').trim(), L2: String(r.L2||'').trim(), L4: toArr(r.L4) })).filter(x=>x.id);
+      return out;
+    }
+
+    document.getElementById('fileImport').addEventListener('change', function(e) {
+      const f = e.target.files[0];
+      if (!f) return;
+      const isExcel = /\.(xlsx|xls)$/i.test(f.name);
+      if (isExcel) {
+        const r = new FileReader();
+        r.onload = () => {
+          try {
+            const wb = XLSX.read(r.result, { type: 'array' });
+            const d = typeof XLSX !== 'undefined' ? parseExcelToBAM(wb) : null;
+            if (!d) { alert('Excel 解析需要 SheetJS，请检查网络'); e.target.value = ''; return; }
+            const v = validateBAM(d);
+            if (!v.ok) { alert('导入验证失败：' + v.msg); e.target.value = ''; return; }
+            loadData(d);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+            const cnt = (d.L1?.length||0) + (d.L2?.length||0) + (d.requirements?.length||0) + (d.epics?.length||0);
+            alert('Excel 导入成功，共 ' + cnt + ' 条核心数据');
+          } catch (err) { alert('Excel 解析失败：' + (err.message || '请确保文件格式正确')); }
+          e.target.value = '';
+        };
+        r.readAsArrayBuffer(f);
+      } else {
+        const r = new FileReader();
+        r.onload = () => {
+          try {
+            const d = JSON.parse(r.result);
+            const v = validateBAM(d);
+            if (!v.ok) {
+              alert('导入验证失败：' + v.msg);
+              e.target.value = '';
+              return;
+            }
+            loadData(d);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+            const cnt = (d.L1?.length||0) + (d.requirements?.length||0) + (d.epics?.length||0);
+            alert('导入成功，共 ' + cnt + ' 条核心数据');
+          } catch (err) {
+            alert('JSON 解析失败：' + (err.message || '请确保文件为有效的 JSON 格式'));
+          }
+          e.target.value = '';
+        };
+        r.readAsText(f, 'UTF-8');
+      }
+    });
+
+    function exportJSON() {
+      syncEditToData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'BAM-追溯矩阵.json';
+      a.click();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function syncEditToData() {
+      if (!document.getElementById('panel-edit').classList.contains('active')) return;
+      data.L1 = collectEditRows('L1', ['id','name','desc']);
+      data.L2 = collectEditRows('L2', ['id','name','route','L1']);
+      data.L3 = collectEditRows('L3', ['id','name','L2','L4']).map(r => ({
+        ...r,
+        L4: r.L4 ? String(r.L4).split(/[,，]/).map(s=>s.trim()).filter(Boolean) : []
+      }));
+      data.requirements = collectEditRows('req', ['id','name','priority','L1','L2','epic']).map(r => ({
+        ...r,
+        L1: r.L1 ? String(r.L1).split(/[,，]/).map(s=>s.trim()).filter(Boolean) : [],
+        L2: r.L2 ? String(r.L2).split(/[,，]/).map(s=>s.trim()).filter(Boolean) : []
+      }));
+      data.epics = collectEditRows('epic', ['id','name','reqs','L2']).map(r => ({
+        ...r,
+        reqs: r.reqs ? String(r.reqs).split(/[,，]/).map(s=>s.trim()).filter(Boolean) : [],
+        L2: r.L2 ? String(r.L2).split(/[,，]/).map(s=>s.trim()).filter(Boolean) : []
+      }));
+      data.stories = collectEditRows('story', ['id','epic','name','L3']).map(r => ({
+        ...r,
+        L3: r.L3 ? String(r.L3).split(/[,，]/).map(s=>s.trim()).filter(Boolean) : []
+      }));
+    }
+
+    function collectEditRows(type, cols) {
+      // type 可能是 'L1'/'L2'/'L3' 或 'req'/'epic'/'story'
+      // HTML 中对应的 tbody id 分别是 editL1/editL2/editL3/editReq/editEpic/editStory
+      const tbody = document.getElementById('edit' + (type === 'req' ? 'Req' : type === 'epic' ? 'Epic' : type === 'story' ? 'Story' : type));
+      const rows = [];
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const row = {};
+        cols.forEach((c, i) => {
+          const inp = tr.querySelectorAll('input, select')[i];
+          if (inp) row[c] = inp.value.trim();
+        });
+        if (row.id || Object.values(row).some(v => v)) rows.push(row);
+      });
+      return rows.filter(r => r.id);
+    }
+
+    function renderEdit() {
+      renderEditTable('L1', ['id','name','desc'], data.L1, (r) => [r.id, r.name, r.desc || '']);
+      renderEditTable('L2', ['id','name','route','L1'], data.L2, (r) => [r.id, r.name, r.route || '', r.L1 || '']);
+      renderEditTable('L3', ['id','name','L2','L4'], data.L3, (r) => [r.id, r.name, r.L2 || '', (r.L4 || []).join('，')]);
+      renderEditTable('req', ['id','name','priority','L1','L2','epic'], data.requirements, (r) => [
+        r.id, r.name, r.priority || 'P1', (r.L1||[]).join(','), (r.L2||[]).join(','), r.epic || ''
+      ]);
+      renderEditTable('epic', ['id','name','reqs','L2'], data.epics, (r) => [
+        r.id, r.name, (r.reqs||[]).join(','), (r.L2||[]).join(',')
+      ]);
+      renderEditTable('story', ['id','epic','name','L3'], data.stories, (r) => [
+        r.id, r.epic || '', r.name, (r.L3||[]).join(',')
+      ]);
+    }
+
+    function renderEditTable(type, cols, arr, getVals) {
+      const tbodyId = 'edit' + (type === 'req' ? 'Req' : type === 'epic' ? 'Epic' : type === 'story' ? 'Story' : type);
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = '';
+      (arr || []).forEach((r, i) => {
+        const tr = document.createElement('tr');
+        const vals = getVals(r);
+        let html = '';
+        vals.forEach((v, j) => {
+          const isSelect = type === 'req' && cols[j] === 'priority';
+          html += '<td>' + (isSelect
+            ? `<select><option value="P1" ${v==='P1'?'selected':''}>P1</option><option value="P2" ${v==='P2'?'selected':''}>P2</option></select>`
+            : `<input type="text" value="${escapeHtml(String(v||''))}" data-col="${cols[j]}">`) + '</td>';
+        });
+        html += '<td class="row-actions"><button class="btn btn-sm" onclick="deleteEditRow(\''+type+'\','+i+')">删除</button></td>';
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    }
+
+    function addRow(type) {
+      syncEditToData();
+      const map = { L1: 'L1', L2: 'L2', L3: 'L3', req: 'requirements', epic: 'epics', story: 'stories' };
+      const key = map[type];
+      const templates = {
+        L1: { id: 'L1-' + (data.L1.length+1), name: '', desc: '' },
+        L2: { id: 'L2-' + (data.L2.length+1), name: '', route: '', L1: data.L1[0]?.id || '' },
+        L3: { id: 'L3-01-' + (data.L3.length+1), name: '', L2: data.L2[0]?.id || '', L4: [] },
+        req: { id: 'REQ-' + String(data.requirements.length+1).padStart(3,'0'), name: '', priority: 'P1', L1: [], L2: [], epic: data.epics[0]?.id || '' },
+        epic: { id: 'EPIC-' + (data.epics.length+1), name: '', reqs: [], L2: [] },
+        story: { id: 'S' + (data.stories.length+1) + '.1', epic: data.epics[0]?.id || '', name: '', L3: [] }
+      };
+      data[key].push(templates[type]);
+      renderEdit();
+      document.querySelector('.tab[data-tab="edit"]').click();
+    }
+
+    function deleteEditRow(type, idx) {
+      syncEditToData();
+      const map = { L1: 'L1', L2: 'L2', L3: 'L3', req: 'requirements', epic: 'epics', story: 'stories' };
+      data[map[type]].splice(idx, 1);
+      renderEdit();
+      renderMatrix();
+      renderChain();
+      renderL3();
+    }
+
+    function initFilters() {
+      const reqSelect = document.getElementById('filterReq');
+      const l1Select = document.getElementById('filterL1');
+      const l2Select = document.getElementById('filterL2');
+      const epicSelect = document.getElementById('filterEpic');
+      [reqSelect, l1Select, l2Select, epicSelect].forEach(s => {
+        s.innerHTML = '<option value="">全部</option>';
+      });
+
+      (data.requirements || []).forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = `${r.id} ${r.name}`;
+        reqSelect.appendChild(opt);
+      });
+      (data.L1 || []).forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.id;
+        opt.textContent = `${l.id} ${l.name}`;
+        l1Select.appendChild(opt);
+      });
+      (data.L2 || []).forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.id;
+        opt.textContent = `${l.id} ${l.name}`;
+        l2Select.appendChild(opt);
+      });
+      (data.epics || []).forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e.id;
+        opt.textContent = `${e.id} ${e.name}`;
+        epicSelect.appendChild(opt);
+      });
+
+      const onFilterChange = () => { renderMatrix(); renderChain(); };
+      [reqSelect, l1Select, l2Select, epicSelect].forEach(el => { el.onchange = onFilterChange; });
+    }
+
+    function getFilter() {
+      return {
+        req: document.getElementById('filterReq').value,
+        l1: document.getElementById('filterL1').value,
+        l2: document.getElementById('filterL2').value,
+        epic: document.getElementById('filterEpic').value
+      };
+    }
+
+    function renderMatrix() {
+      const f = getFilter();
+      const tbody = document.getElementById('matrixBody');
+      tbody.innerHTML = '';
+
+      const reqMap = Object.fromEntries((data.requirements || []).map(r => [r.id, r]));
+      const epicMap = Object.fromEntries((data.epics || []).map(e => [e.id, e]));
+      const l1Map = Object.fromEntries((data.L1 || []).map(l => [l.id, l]));
+      const l2Map = Object.fromEntries((data.L2 || []).map(l => [l.id, l]));
+
+      const rows = [];
+      (data.requirements || []).forEach(req => {
+        if (f.req && req.id !== f.req) return;
+        if (f.epic && req.epic !== f.epic) return;
+        if (f.l1 && !(req.L1 || []).includes(f.l1)) return;
+        if (f.l2 && !(req.L2 || []).includes(f.l2)) return;
+
+        const epic = epicMap[req.epic];
+        const stories = (data.stories || []).filter(s => s.epic === req.epic);
+
+        stories.forEach(story => {
+          const l3Ids = story.L3 || [];
+          const l3Names = l3Ids.map(id => {
+            const l3 = (data.L3 || []).find(x => x.id === id);
+            return l3 ? `${id}: ${l3.name}` : id;
+          });
+
+          rows.push({
+            req: `${req.id} ${req.name}`,
+            reqId: req.id,
+            l1: (req.L1 || []).map(id => l1Map[id]?.name || id).join(', ') || '-',
+            l2: (req.L2 || []).map(id => l2Map[id]?.name || id).join(', ') || '-',
+            epic: `${req.epic} ${epic?.name || ''}`,
+            story: `${story.id} ${story.name}`,
+            l3: l3Names.join('; ') || '-'
+          });
+        });
+        if (stories.length === 0) {
+          rows.push({
+            req: `${req.id} ${req.name}`,
+            reqId: req.id,
+            l1: (req.L1 || []).map(id => l1Map[id]?.name || id).join(', ') || '-',
+            l2: (req.L2 || []).map(id => l2Map[id]?.name || id).join(', ') || '-',
+            epic: `${req.epic} ${epicMap[req.epic]?.name || ''}`,
+            story: '-',
+            l3: '-'
+          });
+        }
+      });
+
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.req}</td>
+          <td>${r.l1}</td>
+          <td>${r.l2}</td>
+          <td>${r.epic}</td>
+          <td>${r.story}</td>
+          <td>${r.l3}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderChain() {
+      const f = getFilter();
+      const container = document.getElementById('chainContent');
+      container.innerHTML = '';
+
+      let items = data.requirements || [];
+      if (f.req) items = items.filter(r => r.id === f.req);
+      if (f.epic) items = items.filter(r => r.epic === f.epic);
+      if (f.l1) items = items.filter(r => (r.L1 || []).includes(f.l1));
+      if (f.l2) items = items.filter(r => (r.L2 || []).includes(f.l2));
+
+      const l1Map = Object.fromEntries((data.L1 || []).map(l => [l.id, l]));
+      const l2Map = Object.fromEntries((data.L2 || []).map(l => [l.id, l]));
+      const epicMap = Object.fromEntries((data.epics || []).map(e => [e.id, e]));
+
+      items.forEach(req => {
+        const epic = epicMap[req.epic];
+        const stories = (data.stories || []).filter(s => s.epic === req.epic);
+        const l1Names = (req.L1 || []).map(id => l1Map[id]?.name).filter(Boolean);
+        const l2Names = (req.L2 || []).map(id => l2Map[id]?.name).filter(Boolean);
+
+        const card = document.createElement('div');
+        card.className = 'trace-card';
+        card.innerHTML = `
+          <h3>${req.id} ${req.name} <span class="badge badge-${req.priority === 'P1' ? 'p1' : 'p2'}">${req.priority || '-'}</span></h3>
+          <div class="chain">
+            <span class="chain-item">${req.id}</span>
+            <span class="chain-arrow">→</span>
+            <span class="chain-item">${l1Names.join(', ') || '-'}</span>
+            <span class="chain-arrow">→</span>
+            <span class="chain-item">${l2Names.join(', ') || '-'}</span>
+            <span class="chain-arrow">→</span>
+            <span class="chain-item">${req.epic} ${epic?.name || ''}</span>
+            <span class="chain-arrow">→</span>
+            <span class="chain-item">${stories.map(s => s.id).join(', ') || '-'}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderL3() {
+      const tbody = document.getElementById('l3Body');
+      tbody.innerHTML = '';
+      const l2Map = Object.fromEntries((data.L2 || []).map(l => [l.id, l]));
+
+      (data.L3 || []).forEach(l3 => {
+        const tr = document.createElement('tr');
+        const l2Name = l2Map[l3.L2]?.name || l3.L2;
+        const l4Str = (l3.L4 || []).length ? (l3.L4 || []).join('； ') : '-';
+        tr.innerHTML = `
+          <td>${l3.id}</td>
+          <td>${l3.name}</td>
+          <td>${l2Name}</td>
+          <td>${l4Str}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.querySelectorAll('.tab').forEach((tab, i) => {
+      tab.setAttribute('tabindex', '0');
+      tab.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tab.click(); }
+        if (e.key === 'ArrowRight' && i < document.querySelectorAll('.tab').length - 1) {
+          document.querySelectorAll('.tab')[i + 1].focus();
+        }
+        if (e.key === 'ArrowLeft' && i > 0) {
+          document.querySelectorAll('.tab')[i - 1].focus();
+        }
+      });
+      tab.addEventListener('click', () => {
+        const wasEdit = document.getElementById('panel-edit').classList.contains('active');
+        if (wasEdit && tab.dataset.tab !== 'edit') {
+          syncEditToData();
+        }
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        if (wasEdit && tab.dataset.tab !== 'edit') {
+          renderMatrix();
+          renderChain();
+          renderL3();
+        }
+      });
+    });
+
+    loadData();
+    if (new URLSearchParams(location.search).get('from') === 'pain') {
+      document.getElementById('fromPainBanner').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
