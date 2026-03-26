@@ -1,0 +1,8 @@
+.git
+.cursor
+node_modules
+*.log
+.DS_Store
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,9 @@
+services:
+  dial-bam:
+    build: .
+    image: dial-bam-method:latest
+    container_name: dial-bam-method
+    ports:
+      # 宿主机端口 : 容器内 Nginx 80；与 npm run serve 的 3789 对齐便于记忆
+      - "3789:80"
+    restart: unless-stopped
