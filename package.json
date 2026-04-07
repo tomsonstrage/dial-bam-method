@@ -1,6 +1,6 @@
 {
   "name": "dial-bam-method",
-  "version": "1.5.0",
+  "version": "1.7.3",
   "description": "业务分析及软件开发体系：DIAL+BAM，融合华为流程、IPD、TOGAF，行业分析→需求→方案→数字化→规划→任务拆解",
   "repository": {
     "type": "git",
@@ -19,7 +19,11 @@
   "scripts": {
     "serve": "npx serve . -p 3789",
     "start": "npx serve . -p 3789",
-    "init": "node scripts/init.js"
+    "init": "node scripts/init.js",
+    "hash-access": "node scripts/hash-access-code.js",
+    "docker:build": "docker build -t dial-bam-method:latest .",
+    "docker:save": "docker save dial-bam-method:latest -o dial-bam-method.tar",
+    "docker:pack": "docker build -t dial-bam-method:latest . && docker save dial-bam-method:latest -o dial-bam-method.tar"
   },
   "bin": {
     "dial-bam-method": "./scripts/init.js"

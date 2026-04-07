@@ -4,6 +4,101 @@
 
 ---
 
+## [1.7.3] - 2026-03-30
+
+### 发布与部署
+
+- **Docker 发布包**：`npm run docker:pack` 生成根目录 `dial-bam-method.tar`（需本机 Docker Desktop 已启动）；服务器执行 `docker load -i dial-bam-method.tar` 后 `docker run -d --name dial-bam-method --restart unless-stopped -p 3789:80 dial-bam-method:latest`。
+- **脚本**：`scripts/deploy-docker.ps1`（可选上传 ECS）、`scripts/ecs-load-run.sh`（服务器侧加载并运行）。
+
+---
+
+## [1.7.2] - 2026-03-30
+
+### 新增
+
+- **`tools/i18n-core.js`**：最小中英切换（`localStorage` 键 `dial-bam-locale`），`data-i18n` / `data-i18n-html` 应用文案。
+- **站点首页**、**工具中心**：右上角语言切换；首页与工具中心关键区块、入口链接、页脚等已接入英文词条。
+- **`docs/多语言说明.md`**：机制说明与扩展方式；**`scripts/init.js`** 纳入 `i18n-core.js` 复制。
+
+---
+
+## [1.7.1] - 2026-03-30
+
+### 更新
+
+- **商业化运营工具**：新增「合同与交付里程碑」「回款与账单计划」两表（与商机管道区分）；AI 提示词与交付包 Markdown 同步输出；交付包检查网格对 GTM 统计增加里程碑/回款笔数提示。
+- **文档与入口**：README / README_EN、交付件清单、01-方法论、平台输入与数据入口、工具应用、**分析工具中心**（主链路表）、交付包导出页说明与上述能力对齐。
+
+---
+
+## [1.7.0] - 2026-03-30
+
+### 新增
+
+- **`tools/商业化运营工具.html`**：商业化启动运营页（定价与套餐、GTM 自检清单、渠道表、商机管道、本月关键指标），localStorage `dial-bam-gtm-ops`，导出 JSON、复制 AI 提示词。
+- **交付包导出**：纳入 `dial-bam-gtm-ops`，Markdown 分段输出。
+- **工具中心**、**分析工具中心**、**init.js**、**学习培训**（扩展课程章节）、**README** / **工具应用** / **01-方法论** / **平台输入与数据入口** / **交付件清单**：同步入口与说明。
+
+---
+
+## [1.6.1] - 2026-03-30
+
+### 新增
+
+- **扩展分析工具**（独立 HTML，localStorage，导出 JSON/AI 提示词）：价值链、安索夫、BCG、用户画像与 JTBD、客户旅程地图、价值流图、根因分析、RACI、对标、场景规划、能力地图简表、战略地图因果链、TOGAF ADM 阶段清单、BABOK 需求检查清单。
+- **分析工具中心**：第三节「扩展分析工具」表格与第四节文档类框架说明。
+
+### 更新
+
+- **交付包导出**：`SOURCES` 纳入上述扩展工具键；Markdown 导出为各键增加可读段落。
+- **init.js**：`COPY_MAP` 增加对应 `tools/*.html`。
+- **工具中心**：分析工具中心卡片说明扩展工具与交付包联动。
+- **文档**：`交付件清单.md`、`参考框架索引.md`、`快速开始.md`、`平台输入与数据入口.md`、`README.md` / `README_EN.md` 与扩展工具、交付包说明对齐。
+- **业务流可视化**：快捷入口与「工具与数据流」「交付件流」说明补充扩展分析工具与交付包关系。
+- **MIT 数字化转型九要素**：增加「相关扩展工具」衔接区块（客户体验/运营/商业模式与能力、因果链）；**文档阅读**：顶栏增加分析工具与扩展工具入口。
+- **04-Architecture.md**：新增「2.1 MIT 九要素、战略解码与扩展工具」，链到 MIT 九要素、战略计分卡/因果链、分析工具中心扩展、交付包及对标/场景/根因/RACI。
+- **03-Insight.md**：新增「3.2 战略解码与扩展工具」（平衡计分卡/因果链、用户画像与 CJM、对标、分析工具中心扩展）。
+- **02-Discovery.md**：新增「1.3 系统内工具衔接」：洞察、痛点、价值链、扩展工具与交付包。
+- **05-Launch.md**：新增「3.3 系统内工具衔接」：规划看板、BML、交付包、场景规划、根因、RACI、扩展索引；导航增加链至 06。
+- **01-方法论.md**：「四、体系工具」拆分为 4.1 主链路（含分析工具中心、MIT 九要素、战略计分卡、业务流等）与 **4.2 全阶段工具速查** 表。
+- **06-AI增强与裁剪.md**：导航增加「Launch ←」；新增「1.6 与系统内工具协作」（BAM/Prompt 生成器/文档阅读/分析工具中心）。
+- **00-核心理念.md**：「五、下一步」增加指向 01 第四节「体系工具」的链接。
+- **内核与延伸.md**：文首增加方法论、工具应用、分析工具中心与扩展索引导航。
+- **根目录 index.html**：「工具与阶段映射」下补充扩展工具与方法论第四节说明；入口增加分析工具中心、扩展分析工具。
+- **README.md**：特性表增加「工具沉淀」一行。
+- **README_EN.md**：增加 Tools 段说明主链路与扩展工具、链至分析工具中心与方法论第四节。
+- **常见问题.md**：新增 Q4d（扩展分析工具、交付包、与方法论第四节关系）。
+- **学习培训.html**：顶栏增加「分析工具中心」「方法论」链接。
+- **学习培训-课程配置.json**：新增课程「扩展分析工具」、实训「扩展分析工具实训」；各角色推荐课程纳入该课；基础测验增 1 题、Launch 测验更新交付包选项；实训完成后链至分析工具中心扩展。
+- **学习培训体系.md**：配置说明中补充扩展课程与实训、与交付包一致。
+- **战略地图与平衡计分卡**：增加「相关工具」说明（因果链、MIT 九要素、安索夫/BCG/场景规划、交付包）。
+
+### 修复
+
+- **客户旅程地图**：删除行改为事件委托，避免索引错乱。
+- **价值流图**：`summary` 与表格统一持久化，避免重复绑定监听。
+- **MIT 数字化转型九要素**：「复制为 AI 提示词」按钮的样式类名（`btn-primary`）。
+- **主链路工具按钮样式**：洞察可视化、痛点画布、商业模式画布、规划看板、BML 验证看板、战略地图与平衡计分卡等将误写的 `class="btn primary"` 改为 `class="btn btn-primary"`，与样式表一致。
+
+---
+
+## [1.6.0] - 2025-03-11
+
+### 新增
+
+**分析工具沉淀**
+- 新增 `tools/分析工具中心.html`：按 DIAL 阶段汇总「参考框架 → 系统内工具 / 文档入口」
+- 新增 `tools/MIT-数字化转型九要素.html`：三大领域×三维度，localStorage `dial-bam-mit9`
+- 新增 `tools/战略地图与平衡计分卡.html`：四视角目标与 KPI，localStorage `dial-bam-bsc`
+
+### 更新
+
+- **交付包导出**：纳入 MIT 九要素、战略计分卡数据键
+- **工具中心**、**参考框架索引**、**工具应用**、**交付件清单**、**init**：同步上述工具
+
+---
+
 ## [1.5.0] - 2025-03-11
 
 ### 新增
@@ -233,6 +328,11 @@
 
 ---
 
+[1.7.2]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.7.2
+[1.7.1]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.7.1
+[1.7.0]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.7.0
+[1.6.1]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.6.1
+[1.6.0]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.6.0
 [1.5.0]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.5.0
 [1.4.0]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.4.0
 [1.2.0]: https://github.com/YOUR_USERNAME/dial-bam-method/releases/tag/v1.2.0
